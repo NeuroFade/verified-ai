@@ -696,6 +696,7 @@
         <div class="nav-links">
           <a href="#what-is">What is it</a>
           <a href="#how-to-use">How to use</a>
+          <a href="#token">Token</a>
           <a href="#contracts">Contracts</a>
           <a href="#integrate">SDK</a>
           <a href="https://neuro-8.gitbook.io/verified-ai/" target="_blank">Docs</a>
@@ -975,13 +976,55 @@ console.<span class="fn">log</span>(hasProof) <span class="cm">// true</span></p
 
 <hr />
 
+<!-- ─── TOKEN ─── -->
+<section id="token">
+  <div class="container">
+    <p class="section-eyebrow">Token</p>
+    <h2 class="section-title fade-in">$VERAI — The Verified AI Token</h2>
+    <p class="section-desc fade-in" style="max-width:560px">The native token powering the Verified AI network. Deployed on Base mainnet. Use $VERAI to pay for attestation submissions, access premium proof features, and participate in protocol governance.</p>
+    <div class="token-card fade-in">
+      <div class="token-header">
+        <div class="token-icon-wrap">
+          <img src="./logo.jpg" alt="VERAI" class="token-icon" />
+        </div>
+        <div class="token-info">
+          <div class="token-name">Verified AI</div>
+          <div class="token-ticker">$VERAI</div>
+        </div>
+        <span class="mainnet-badge" style="margin-left:auto">Base Mainnet</span>
+      </div>
+      <div class="token-addr-section">
+        <div class="token-addr-label">Contract Address</div>
+        <div class="token-addr-row">
+          <a href="https://basescan.org/token/0xaf0d3d0a26411aCbAbC4205d74764145aC5CEB07" target="_blank" class="contract-addr" style="font-size:0.8rem">0xaf0d3d0a26411aCbAbC4205d74764145aC5CEB07 ↗</a>
+        </div>
+      </div>
+      <div class="token-actions">
+        <a href="https://basescan.org/token/0xaf0d3d0a26411aCbAbC4205d74764145aC5CEB07" class="btn btn-primary" target="_blank" style="font-size:0.8rem">View on BaseScan ↗</a>
+        <a href="https://app.uniswap.org/#/swap?outputCurrency=0xaf0d3d0a26411aCbAbC4205d74764145aC5CEB07&chain=base" class="btn btn-outline" target="_blank" style="font-size:0.8rem">Trade on Uniswap</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr />
+
 <!-- ─── CONTRACTS ─── -->
 <section id="contracts">
   <div class="container">
     <p class="section-eyebrow">Smart Contracts</p>
-    <h2 class="section-title fade-in">Two contracts, one system</h2>
-    <p class="section-desc fade-in">Identity layer + proof layer. Composable by design, deployed on Base mainnet.</p>
-    <div class="contracts-grid fade-in">
+    <h2 class="section-title fade-in">Three contracts, one system</h2>
+    <p class="section-desc fade-in">Token + identity layer + proof layer. Composable by design, deployed on Base mainnet.</p>
+    <div class="contracts-grid fade-in" style="grid-template-columns: repeat(3, 1fr)">
+      <div class="contract-card">
+        <div class="contract-tag">Token</div>
+        <h3>VERAI Token</h3>
+        <p>The native ERC-20 token of the Verified AI ecosystem. Used for attestation fees, protocol access, and governance.</p>
+        <div class="contract-addr-row">
+          <a href="https://basescan.org/token/0xaf0d3d0a26411aCbAbC4205d74764145aC5CEB07" target="_blank" class="contract-addr">0xaf0d3d…CEB07 ↗</a>
+          <span class="mainnet-badge">Mainnet</span>
+        </div>
+      </div>
       <div class="contract-card">
         <div class="contract-tag">Registry</div>
         <h3>AttestationRegistry</h3>
@@ -1103,6 +1146,7 @@ console.<span class="fn">log</span>(valid) <span class="cm">// true</span></pre>
       <div class="footer-links">
         <a href="https://github.com/NeuroFade/verified-ai" target="_blank">GitHub</a>
         <a href="https://neuro-8.gitbook.io/verified-ai/" target="_blank">Docs</a>
+        <a href="https://basescan.org/token/0xaf0d3d0a26411aCbAbC4205d74764145aC5CEB07" target="_blank">$VERAI</a>
         <a href="https://basescan.org/address/0x3dBF622ABC705d2Ec0E07EB0fCbb1AbFDe0281eb" target="_blank">AttestationRegistry</a>
         <a href="https://basescan.org/address/0xc303124d9276Ea7D3d75E94cE7fE5bd3DBec85d3" target="_blank">ZKVerifier</a>
       </div>
