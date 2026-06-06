@@ -51,10 +51,10 @@ Verified AI is a decentralized attestation protocol that enables any AI inferenc
 
 | Contract | Address (Base) | Description |
 |---|---|---|
-| `AttestationRegistry` | `0x...` | Stores all attestation records |
-| `ZKVerifier` | `0x...` | Validates ZK proofs on-chain |
+| `AttestationRegistry` | [`0x3dBF622ABC705d2Ec0E07EB0fCbb1AbFDe0281eb`](https://basescan.org/address/0x3dBF622ABC705d2Ec0E07EB0fCbb1AbFDe0281eb) | Stores all attestation records |
+| `ZKVerifier` | [`0xc303124d9276Ea7D3d75E94cE7fE5bd3DBec85d3`](https://basescan.org/address/0xc303124d9276Ea7D3d75E94cE7fE5bd3DBec85d3) | Validates ZK proofs on-chain |
 
-View on BaseScan: [AttestationRegistry](#) · [ZKVerifier](#)
+View on BaseScan: [AttestationRegistry](https://basescan.org/address/0x3dBF622ABC705d2Ec0E07EB0fCbb1AbFDe0281eb) · [ZKVerifier](https://basescan.org/address/0xc303124d9276Ea7D3d75E94cE7fE5bd3DBec85d3)
 
 ---
 

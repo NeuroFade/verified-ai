@@ -8,10 +8,10 @@ Verified AI is composed of two core smart contracts deployed on Base mainnet.
 
 | Contract | Network | Address |
 |---|---|---|
-| `AttestationRegistry` | Base Mainnet | `0x...` |
-| `AttestationRegistry` | Base Sepolia | `0x...` |
-| `ZKVerifier` | Base Mainnet | `0x...` |
-| `ZKVerifier` | Base Sepolia | `0x...` |
+| `AttestationRegistry` | Base Mainnet | [`0x3dBF622ABC705d2Ec0E07EB0fCbb1AbFDe0281eb`](https://basescan.org/address/0x3dBF622ABC705d2Ec0E07EB0fCbb1AbFDe0281eb) |
+| `AttestationRegistry` | Base Sepolia | `pending` |
+| `ZKVerifier` | Base Mainnet | [`0xc303124d9276Ea7D3d75E94cE7fE5bd3DBec85d3`](https://basescan.org/address/0xc303124d9276Ea7D3d75E94cE7fE5bd3DBec85d3) |
+| `ZKVerifier` | Base Sepolia | `pending` |
 
 ---
 
