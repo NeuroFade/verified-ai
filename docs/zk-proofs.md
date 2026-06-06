@@ -1,119 +1,139 @@
 # ZK Proofs
 
-Verified AI uses zero-knowledge proofs to enable trustless verification of AI inference — without revealing the model weights, system prompts, or sensitive input data.
+How Verified AI uses zero-knowledge proofs to make AI inference trustless.
 
 ---
 
-## What is a ZK Proof?
+## The problem
 
-A zero-knowledge proof (ZKP) lets one party (the **prover**) convince another (the **verifier**) that a statement is true — without revealing any information beyond the statement's validity.
+When an AI model produces an output, there's currently no way to prove:
+- **Which model** produced it (not a different, cheaper model)
+- **What the exact input was** (no prompt injection or tampering)
+- **What the output was** (not a fabricated response)
+
+Without revealing the model weights, system prompts, or user data.
+
+ZK proofs solve this.
+
+---
+
+## What is a ZK proof?
+
+A zero-knowledge proof lets the **prover** convince the **verifier** that a statement is true — without revealing *why* it's true or any underlying private data.
 
 In Verified AI's context:
 
-> **"This AI model (M) received input (I) and produced output (O)"**  
-> — provable without revealing M's weights or the full raw I/O
+> *"This specific model (M) received this input (I) and produced this output (O)"*  
+> — provable on-chain, without exposing M's weights or raw I/O
 
 ---
 
-## Proof System
+## Proof system
 
-Verified AI uses **Groth16** — the most gas-efficient ZK proving system available, making on-chain verification economically viable.
+Verified AI uses **Groth16** — the most gas-efficient ZK proving system, enabling economically viable on-chain verification.
 
 | Property | Value |
 |---|---|
 | Proving system | Groth16 |
-| Curve | BN254 |
+| Elliptic curve | BN254 |
 | Proof size | ~256 bytes |
-| On-chain verification cost | ~250,000 gas |
-| Setup | Universal trusted setup (Hermez ceremony) |
+| On-chain verification gas | ~250,000 |
+| Verification cost on Base | ~$0.01 |
+| Trusted setup | Hermez Phase 2 ceremony (1000+ participants) |
 
 ---
 
-## How It Works
+## Proof flow
 
-### 1. Inference Phase (off-chain)
-
-```
-AI Model receives prompt P
-    ↓
-Model produces response R
-    ↓
-Execution metadata captured:
-  - Model hash (identifies exact model version)
-  - Input hash: keccak256(P)
-  - Output hash: keccak256(R)
-  - Timestamp + nonce
-```
-
-### 2. Proving Phase (off-chain)
+### 1 — Inference (off-chain)
 
 ```
-ZK Circuit receives:
-  - Private inputs: raw prompt, response, model weights hash
-  - Public inputs: inputHash, outputHash, modelId
-    ↓
+User sends prompt P to model M
+  ↓
+M produces response R
+  ↓
+System captures:
+  inputHash  = keccak256(P)
+  outputHash = keccak256(R)
+  modelHash  = keccak256(model weights fingerprint)
+```
+
+### 2 — Proving (off-chain, ~2-10 seconds)
+
+```
+ZK circuit receives:
+  Private inputs: raw P, raw R, model weights hash
+  Public inputs:  inputHash, outputHash, modelId
+  ↓
 Groth16 prover generates π (proof)
-    ↓
-Proof size: ~256 bytes
-Proving time: ~2-10 seconds (hardware dependent)
+  ↓
+proofHash       = keccak256(π)
+publicInputsHash = keccak256(modelHash ++ outputHash)
 ```
 
-### 3. Verification Phase (on-chain)
+### 3 — Attestation (on-chain)
 
 ```
-ZKVerifier.verifyProof(π, inputHash, outputHash)
-    ↓
-EVM runs Groth16 pairing check
-    ↓
-Returns: true / false
-    ↓
-AttestationRegistry stores result
+AttestatioRegistry.attest(modelId, inputHash, outputHash, proof)
+  ↓
+attestationId = keccak256(attester, modelId, inputHash, outputHash, timestamp)
+  ↓
+ZKVerifier.submitProof(attestationId, proofHash, publicInputsHash)
+  ↓
+proof stored as commitment — verifiable by anyone
+```
+
+### 4 — Verification (on-chain, permissionless)
+
+```
+ZKVerifier.verifyProof(attestationId) → true / false
 ```
 
 ---
 
-## Privacy Guarantees
+## Privacy guarantees
 
-| Data | On-chain visibility |
+| Data | Visible on-chain? |
 |---|---|
-| Model weights | ❌ Never revealed |
-| System prompt | ❌ Never revealed |
-| Raw user prompt | ❌ Never revealed |
-| Raw response | ❌ Never revealed |
+| Model weights | ❌ Never |
+| System prompt | ❌ Never |
+| Raw user prompt | ❌ Never |
+| Raw AI response | ❌ Never |
+| Model identifier | ✅ Public |
 | Input hash | ✅ Public |
 | Output hash | ✅ Public |
 | Proof hash | ✅ Public |
-| Model ID | ✅ Public |
+| Attester address | ✅ Public |
 | Timestamp | ✅ Public |
-| Validity | ✅ Public |
+| Attestation validity | ✅ Public |
 
 ---
 
-## Circuit Design
+## Circuit design
 
 The ZK circuit enforces:
 
-1. **Model binding** — Proof is tied to a specific model version hash
-2. **Input/output binding** — `keccak256(prompt) == inputHash` must hold
-3. **Execution integrity** — Model weights hash matches registered model
-4. **Non-replayability** — Nonce prevents proof reuse
+1. **Model binding** — Proof is cryptographically tied to a specific model version hash
+2. **Input/output binding** — `keccak256(prompt) == inputHash` must hold inside the circuit
+3. **Execution integrity** — Model weights hash matches the registered model fingerprint
+4. **Non-replayability** — Nonce prevents proof reuse across attestations
 
 ---
 
-## Generating Proofs (SDK)
+## Generating proofs (SDK)
 
-The SDK handles proof generation automatically:
+The SDK handles proof generation automatically inside `attest()`:
 
 ```typescript
-// Under the hood, attest() generates the ZK proof for you
-const attestation = await client.attest({
+const result = await client.attest({
   model: 'gpt-4o',
-  prompt: 'Your prompt here',
-  response: 'Model response here',
+  prompt: 'Your prompt',
+  response: 'Model response',
 });
+// ZK proof generated + submitted in one call
 ```
 
-For advanced use cases, generate proofs manually:
+For advanced use (custom provers):
 
 ```typescript
 import { ZKProver } from 'verified-ai-sdk/zk';
@@ -125,26 +145,37 @@ const proof = await prover.generate({
   response: 'Model response',
 });
 
-console.log(proof.bytes);   // Raw proof bytes (hex)
-console.log(proof.hash);    // keccak256 of proof
-console.log(proof.valid);   // Pre-verified locally
+console.log(proof.bytes);          // Raw proof (~256 bytes, hex)
+console.log(proof.hash);           // keccak256 of proof
+console.log(proof.publicInputs);   // Public inputs for on-chain verification
+
+// Submit manually
+await client.submitProof({
+  attestationId,
+  proofHash: proof.hash,
+  publicInputsHash: proof.publicInputs.hash,
+});
 ```
 
 ---
 
-## Trusted Setup
+## Trusted setup
 
-Verified AI uses proofs from the **Hermez Phase 2 ceremony** — one of the largest trusted setups ever conducted, with 1000+ participants. A single honest participant ensures security.
+Verified AI uses proofs generated from the **Hermez Phase 2 ceremony** — one of the largest trusted setups ever conducted, with 1000+ participants. Even a single honest participant ensures security of the entire setup.
 
 The ceremony transcript is publicly verifiable:
-- [Hermez Ceremony](https://hermez.io/hermez-cryptographic-setup-ceremony-transcript/)
-- Circuit-specific setup: [TBD — will publish when mainnet launches]
+- [Hermez Ceremony transcript](https://hermez.io/hermez-cryptographic-setup-ceremony-transcript/)
+- Circuit-specific setup: published at mainnet launch
 
 ---
 
-## Limitations
+## Current limitations
 
-- **Proving time**: 2-10 seconds per inference (hardware dependent)
-- **Model support**: Currently requires models with accessible inference hooks
-- **Cost**: ~250k gas per on-chain verification (~$0.01-0.10 on Base)
-- **Proof generation**: Currently centralized prover; decentralized provers roadmapped
+| Limitation | Status |
+|---|---|
+| Full Groth16 on-chain verifier | Roadmap Q3 2025 |
+| Decentralized prover network | Roadmap Q4 2025 |
+| GPU-accelerated proving | Research |
+| Model support (requires inference hooks) | Growing list |
+
+For now, proof commitments (hashes) are stored on-chain and verified against submitted public inputs. Full on-chain pairing check ships with the Groth16 verifier upgrade.

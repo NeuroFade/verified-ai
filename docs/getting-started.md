@@ -1,89 +1,129 @@
 # Getting Started
 
-Welcome to Verified AI. This guide will get you from zero to your first on-chain attestation in under 10 minutes.
+Get your first on-chain attestation in under 5 minutes.
 
 ---
 
 ## Prerequisites
 
-| Requirement | Version | Notes |
-|---|---|---|
-| Node.js | 18+ | LTS recommended |
-| npm / yarn | any | Package manager |
-| Base wallet | — | With testnet ETH on Base Sepolia |
-| Private key | — | Never commit to git |
+- Node.js 18+
+- A Base mainnet RPC endpoint (default: `https://mainnet.base.org`)
+- A funded wallet with ~0.001 ETH on Base (for gas)
 
 ---
 
-## Step 1 — Install
+## 1. Install the SDK
 
 ```bash
 npm install verified-ai-sdk
-```
-
-Or with yarn:
-```bash
+# or
 yarn add verified-ai-sdk
+# or
+pnpm add verified-ai-sdk
 ```
 
 ---
 
-## Step 2 — Configure
-
-Create a `.env` file:
-
-```bash
-PRIVATE_KEY=0xYourPrivateKeyHere
-RPC_URL=https://mainnet.base.org   # or https://sepolia.base.org for testnet
-```
-
-> ⚠️ Never share or commit your private key.
-
----
-
-## Step 3 — Initialize Client
+## 2. Initialize the client
 
 ```typescript
 import { VerifiedAI } from 'verified-ai-sdk';
-import * as dotenv from 'dotenv';
-dotenv.config();
 
 const client = new VerifiedAI({
-  network: 'base-sepolia',        // Start on testnet
+  network: 'base-mainnet',
+  privateKey: process.env.PRIVATE_KEY!, // needed for write operations
+});
+```
+
+For read-only use (just verifying), omit `privateKey`:
+
+```typescript
+const client = new VerifiedAI({ network: 'base-mainnet' });
+const isValid = await client.verify('0x3f4a...');
+```
+
+---
+
+## 3. Submit your first attestation
+
+```typescript
+const result = await client.attest({
+  model: 'gpt-4o',
+  prompt: 'What is the capital of France?',
+  response: 'The capital of France is Paris.',
+});
+
+console.log('✅ Attested!');
+console.log('  ID:      ', result.id);
+console.log('  TX:      ', `https://basescan.org/tx/${result.txHash}`);
+console.log('  Mined:   ', result.blockNumber);
+```
+
+---
+
+## 4. Verify it
+
+```typescript
+const isValid = await client.verify(result.id);
+console.log('Valid:', isValid); // true
+
+const record = await client.getAttestation(result.id);
+console.log('Model:     ', record.modelId);
+console.log('Timestamp: ', new Date(record.timestamp * 1000).toISOString());
+console.log('Valid:     ', record.valid);
+```
+
+---
+
+## 5. View on BaseScan
+
+Every attestation is publicly queryable:
+
+- [AttestationRegistry on BaseScan](https://basescan.org/address/0x3dBF622ABC705d2Ec0E07EB0fCbb1AbFDe0281eb)
+- [ZKVerifier on BaseScan](https://basescan.org/address/0xc303124d9276Ea7D3d75E94cE7fE5bd3DBec85d3)
+
+---
+
+## Environment setup
+
+Create a `.env` file:
+
+```env
+PRIVATE_KEY=0x...
+BASE_RPC_URL=https://mainnet.base.org
+```
+
+Load with `dotenv`:
+
+```typescript
+import 'dotenv/config';
+import { VerifiedAI } from 'verified-ai-sdk';
+
+const client = new VerifiedAI({
+  network: 'base-mainnet',
+  privateKey: process.env.PRIVATE_KEY!,
+  rpcUrl: process.env.BASE_RPC_URL,
+});
+```
+
+---
+
+## Testnet (Base Sepolia)
+
+For development, use Base Sepolia — get free ETH from the [Coinbase faucet](https://www.coinbase.com/faucets/base-ethereum-sepolia-faucet):
+
+```typescript
+const client = new VerifiedAI({
+  network: 'base-sepolia',
   privateKey: process.env.PRIVATE_KEY!,
 });
 ```
 
 ---
 
-## Step 4 — Create Your First Attestation
+## Next steps
 
-```typescript
-const attestation = await client.attest({
-  model: 'gpt-4o',
-  prompt: 'Summarize the Ethereum whitepaper',
-  response: 'Ethereum is a decentralized platform...',
-});
-
-console.log('✅ Attestation created!');
-console.log('ID:', attestation.id);
-console.log('Tx:', `https://sepolia.basescan.org/tx/${attestation.txHash}`);
-```
-
----
-
-## Step 5 — Verify It
-
-```typescript
-const isValid = await client.verify(attestation.id);
-console.log('Valid:', isValid); // → true
-```
-
----
-
-## Next Steps
-
-- Read the [SDK Reference](./sdk-reference.md) for full API docs
-- Check [Contract Interface](./contracts.md) for on-chain integration
-- See [Examples](./examples.md) for real-world patterns
-- Learn about [ZK Proofs](./zk-proofs.md) in the protocol
+- [SDK Reference](./sdk-reference.md) — full method documentation
+- [Examples](./examples.md) — Next.js, CLI, batch patterns
+- [ZK Proofs](./zk-proofs.md) — how the proof system works
+- [Contracts](./contracts.md) — ABI and direct integration

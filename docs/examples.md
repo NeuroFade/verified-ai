@@ -4,132 +4,156 @@ Real-world usage patterns for Verified AI.
 
 ---
 
-## Basic Attestation
+## 1. Basic attestation
+
+The simplest possible flow — attest an inference, then verify it.
 
 ```typescript
 import { VerifiedAI } from 'verified-ai-sdk';
+import 'dotenv/config';
 
 const client = new VerifiedAI({
   network: 'base-mainnet',
   privateKey: process.env.PRIVATE_KEY!,
 });
 
-const result = await client.attest({
-  model: 'gpt-4o',
-  prompt: 'Explain quantum computing in one sentence.',
-  response: 'Quantum computing uses quantum mechanical phenomena...',
-});
-
-console.log('Attestation ID:', result.id);
-console.log('BaseScan:', `https://basescan.org/tx/${result.txHash}`);
-```
-
----
-
-## Verify Before Using Output
-
-Pattern: verify an attestation from a third-party before trusting their AI output.
-
-```typescript
-async function trustedAIResponse(attestationId: string): Promise<boolean> {
-  const client = new VerifiedAI({
-    network: 'base-mainnet',
-    privateKey: process.env.PRIVATE_KEY!,
+async function main() {
+  // Attest
+  const result = await client.attest({
+    model: 'gpt-4o',
+    prompt: 'What is 2 + 2?',
+    response: '4',
   });
 
-  const isValid = await client.verify(attestationId);
+  console.log('Attestation ID:', result.id);
+  console.log('BaseScan:', `https://basescan.org/tx/${result.txHash}`);
 
-  if (!isValid) {
-    throw new Error('Attestation invalid — AI output cannot be trusted');
-  }
+  // Verify
+  const valid = await client.verify(result.id);
+  console.log('Valid:', valid); // true
+}
+
+main();
+```
+
+---
+
+## 2. Verify before trusting
+
+Pattern: a consumer verifies a third-party's attestation before using their AI output.
+
+```typescript
+async function verifyBeforeUsing(attestationId: string) {
+  const client = new VerifiedAI({ network: 'base-mainnet' }); // read-only
+
+  const isValid = await client.verify(attestationId);
+  if (!isValid) throw new Error('Attestation invalid — cannot trust this output');
 
   const record = await client.getAttestation(attestationId);
-  console.log('Verified output from model:', record.modelId);
-  console.log('Attested at block:', record.blockNumber);
-
-  return true;
-}
-```
-
----
-
-## Batch Attestations
-
-```typescript
-const prompts = [
-  { model: 'gpt-4o', prompt: 'Question 1', response: 'Answer 1' },
-  { model: 'claude-3-5-sonnet', prompt: 'Question 2', response: 'Answer 2' },
-  { model: 'gpt-4o', prompt: 'Question 3', response: 'Answer 3' },
-];
-
-const attestations = await Promise.all(
-  prompts.map(p => client.attest(p))
-);
-
-console.log('All attestation IDs:');
-attestations.forEach(a => console.log(a.id));
-```
-
----
-
-## Event Listener
-
-Real-time monitoring of new attestations:
-
-```typescript
-const unsubscribe = client.watchAttestations((attestation) => {
-  console.log(`New ${attestation.modelId} attestation:`, attestation.id);
-  console.log(`Attester: ${attestation.attester}`);
-  console.log(`Valid: ${attestation.valid}`);
-});
-
-// Stop listening after 60 seconds
-setTimeout(() => unsubscribe(), 60_000);
-```
-
----
-
-## Audit Trail
-
-Build a complete audit trail of AI decisions:
-
-```typescript
-interface AIDecision {
-  decision: string;
-  reason: string;
-  attestationId: string;
-  timestamp: number;
-}
-
-async function attestedDecision(
-  prompt: string,
-  model: string,
-  aiResponse: string
-): Promise<AIDecision> {
-  const att = await client.attest({ model, prompt, response: aiResponse });
 
   return {
-    decision: aiResponse,
-    reason: prompt,
-    attestationId: att.id,
-    timestamp: att.timestamp,
+    model: record.modelId,
+    attestedAt: new Date(record.timestamp * 1000).toISOString(),
+    attester: record.attester,
+    valid: true,
+  };
+}
+```
+
+---
+
+## 3. Audit trail for AI decisions
+
+Record every AI decision with an on-chain audit trail.
+
+```typescript
+import { VerifiedAI } from 'verified-ai-sdk';
+
+const client = new VerifiedAI({ network: 'base-mainnet', privateKey: process.env.PRIVATE_KEY! });
+
+interface AIDecisionRecord {
+  question: string;
+  answer: string;
+  attestationId: string;
+  txHash: string;
+  timestamp: string;
+  verifiable: string; // BaseScan URL
+}
+
+async function recordDecision(question: string, answer: string): Promise<AIDecisionRecord> {
+  const result = await client.attest({
+    model: 'claude-3-5-sonnet',
+    prompt: question,
+    response: answer,
+  });
+
+  return {
+    question,
+    answer,
+    attestationId: result.id,
+    txHash: result.txHash,
+    timestamp: new Date(result.timestamp * 1000).toISOString(),
+    verifiable: `https://basescan.org/tx/${result.txHash}`,
   };
 }
 
 // Usage
-const decision = await attestedDecision(
-  'Should we approve this loan application?',
-  'gpt-4o',
-  'Approved — credit score 780, income verified'
+const record = await recordDecision(
+  'Should this loan application be approved?',
+  'Approved — credit score 780, DTI ratio 28%, 5-year employment history'
 );
 
-// Anyone can verify this decision was genuinely AI-generated
-const isLegit = await client.verify(decision.attestationId);
+console.log('Tamper-proof record:', JSON.stringify(record, null, 2));
 ```
 
 ---
 
-## Next.js API Route
+## 4. Batch attestations
+
+```typescript
+const inferences = [
+  { model: 'gpt-4o', prompt: 'Classify this email', response: 'Spam' },
+  { model: 'gpt-4o', prompt: 'Sentiment: Great product!', response: 'Positive' },
+  { model: 'claude-3-5-sonnet', prompt: 'Translate to French: Hello', response: 'Bonjour' },
+];
+
+// Parallel submission
+const results = await Promise.all(
+  inferences.map(inf => client.attest(inf))
+);
+
+console.log('Batch complete:');
+results.forEach((r, i) => {
+  console.log(`  [${i + 1}] ${r.id}`);
+});
+```
+
+---
+
+## 5. Real-time event monitoring
+
+```typescript
+const client = new VerifiedAI({ network: 'base-mainnet' });
+
+console.log('Watching for new attestations...');
+
+const unsubscribe = client.watchAttestations((attestation) => {
+  console.log(`\n🔔 New attestation from ${attestation.attester}`);
+  console.log(`   Model:  ${attestation.modelId}`);
+  console.log(`   ID:     ${attestation.id}`);
+  console.log(`   Valid:  ${attestation.valid}`);
+});
+
+// Run for 5 minutes then stop
+setTimeout(() => {
+  unsubscribe();
+  console.log('Stopped watching.');
+}, 5 * 60 * 1000);
+```
+
+---
+
+## 6. Next.js API route
 
 ```typescript
 // app/api/attest/route.ts
@@ -144,10 +168,19 @@ const client = new VerifiedAI({
 export async function POST(req: NextRequest) {
   const { model, prompt, response } = await req.json();
 
+  if (!model || !prompt || !response) {
+    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+  }
+
   try {
-    const attestation = await client.attest({ model, prompt, response });
-    return NextResponse.json({ attestationId: attestation.id, valid: true });
-  } catch (error) {
+    const result = await client.attest({ model, prompt, response });
+    return NextResponse.json({
+      success: true,
+      attestationId: result.id,
+      txHash: result.txHash,
+      explorer: `https://basescan.org/tx/${result.txHash}`,
+    });
+  } catch (err) {
     return NextResponse.json({ error: 'Attestation failed' }, { status: 500 });
   }
 }
@@ -155,10 +188,12 @@ export async function POST(req: NextRequest) {
 // GET /api/attest?id=0x...
 export async function GET(req: NextRequest) {
   const id = req.nextUrl.searchParams.get('id');
-  if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+  if (!id) return NextResponse.json({ error: 'Missing id param' }, { status: 400 });
 
-  const valid = await client.verify(id);
-  const record = await client.getAttestation(id);
+  const [valid, record] = await Promise.all([
+    client.verify(id),
+    client.getAttestation(id),
+  ]);
 
   return NextResponse.json({ valid, record });
 }
@@ -166,45 +201,90 @@ export async function GET(req: NextRequest) {
 
 ---
 
-## CLI Tool
-
-Simple CLI for attesting and verifying:
-
-```bash
-# Attest
-npx verified-ai attest \
-  --model gpt-4o \
-  --prompt "Your prompt" \
-  --response "The response" \
-  --network base-mainnet
-
-# Verify
-npx verified-ai verify 0x3f4a...c9d2 --network base-mainnet
-```
-
----
-
-## Ethers.js Direct Integration
-
-Skip the SDK and call contracts directly:
+## 7. Direct contract calls (no SDK)
 
 ```typescript
 import { ethers } from 'ethers';
-import { REGISTRY_ABI, REGISTRY_ADDRESS, VERIFIER_ABI, VERIFIER_ADDRESS } from 'verified-ai-sdk/contracts';
+
+const REGISTRY = '0x3dBF622ABC705d2Ec0E07EB0fCbb1AbFDe0281eb';
+const VERIFIER  = '0xc303124d9276Ea7D3d75E94cE7fE5bd3DBec85d3';
 
 const provider = new ethers.JsonRpcProvider('https://mainnet.base.org');
 const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
 
-const registry = new ethers.Contract(REGISTRY_ADDRESS['base-mainnet'], REGISTRY_ABI, signer);
+const registry = new ethers.Contract(REGISTRY, REGISTRY_ABI, signer);
+const verifier  = new ethers.Contract(VERIFIER, VERIFIER_ABI, provider);
 
-// Submit attestation
-const modelId = 'gpt-4o';
-const inputHash = ethers.keccak256(ethers.toUtf8Bytes('my prompt'));
-const outputHash = ethers.keccak256(ethers.toUtf8Bytes('ai response'));
-const zkProof = '0x...'; // Generated off-chain
-
-const tx = await registry.attest(modelId, inputHash, outputHash, zkProof);
+// Attest
+const inputHash  = ethers.keccak256(ethers.toUtf8Bytes('prompt text'));
+const outputHash = ethers.keccak256(ethers.toUtf8Bytes('response text'));
+const tx = await registry.attest('gpt-4o', inputHash, outputHash, '0x');
 const receipt = await tx.wait();
+console.log('Attested at block:', receipt.blockNumber);
 
-console.log('Mined in block:', receipt.blockNumber);
+// Verify
+const attId = receipt.logs[0].topics[1]; // attestationId from event
+const valid = await verifier.verifyProof(attId);
+console.log('Valid:', valid);
+```
+
+---
+
+## 8. CLI tool
+
+```bash
+# Install
+npm install -g verified-ai-sdk
+
+# Attest
+vai attest \
+  --model gpt-4o \
+  --prompt "What is the capital of Japan?" \
+  --response "Tokyo" \
+  --network base-mainnet
+
+# Output:
+# ✅ Attested!
+#    ID:    0x3f4a...c9d2
+#    TX:    https://basescan.org/tx/0xabcd...
+
+# Verify
+vai verify 0x3f4a...c9d2 --network base-mainnet
+
+# Output:
+# ✅ Valid (attested by 0x5E73... at 2025-01-15T14:23:00Z)
+```
+
+---
+
+## 9. Agent-to-agent trust
+
+Pattern: Agent A verifies Agent B's outputs before acting on them.
+
+```typescript
+import { VerifiedAI } from 'verified-ai-sdk';
+
+class TrustingAgent {
+  private client = new VerifiedAI({ network: 'base-mainnet' });
+
+  async actOnResult(data: { answer: string; attestationId: string }) {
+    // Verify before trusting
+    const isVerified = await this.client.verify(data.attestationId);
+    if (!isVerified) {
+      throw new Error(`Cannot trust unverified AI output from agent`);
+    }
+
+    const record = await this.client.getAttestation(data.attestationId);
+    console.log(`✅ Trusting output from model: ${record.modelId}`);
+    console.log(`   Attested by: ${record.attester}`);
+
+    // Now safe to act on data.answer
+    return this.process(data.answer);
+  }
+
+  private process(answer: string) {
+    // downstream processing
+    return { processed: true, answer };
+  }
+}
 ```

@@ -1,6 +1,6 @@
 # SDK Reference
 
-Full API reference for the `verified-ai-sdk` TypeScript package.
+Full API reference for `verified-ai-sdk`.
 
 ---
 
@@ -12,213 +12,273 @@ npm install verified-ai-sdk
 
 ---
 
-## `VerifiedAI` Class
+## `new VerifiedAI(config)`
 
-### Constructor
-
-```typescript
-new VerifiedAI(config: ClientConfig)
-```
-
-#### `ClientConfig`
+Creates a new client instance.
 
 ```typescript
-interface ClientConfig {
-  network: 'base-mainnet' | 'base-sepolia';
-  privateKey: string;
-  rpcUrl?: string;              // Custom RPC (optional)
-  registryAddress?: string;    // Override contract address (optional)
-  verifierAddress?: string;    // Override verifier address (optional)
-  timeout?: number;            // Request timeout in ms (default: 30000)
-}
+const client = new VerifiedAI({
+  network: 'base-mainnet',   // 'base-mainnet' | 'base-sepolia'
+  privateKey: '0x...',       // optional; required for write operations
+  rpcUrl: 'https://...',     // optional; overrides default RPC
+});
 ```
+
+### Config
+
+| Field | Type | Required | Default |
+|---|---|---|---|
+| `network` | `'base-mainnet' \| 'base-sepolia'` | ✅ | — |
+| `privateKey` | `string` | ✗ | — |
+| `rpcUrl` | `string` | ✗ | Network default |
 
 ---
 
-## Methods
+## Write Methods
 
-### `attest(options)`
+### `attest(params)`
 
-Submit a new attestation for an AI inference.
-
-```typescript
-async attest(options: AttestOptions): Promise<Attestation>
-```
-
-#### `AttestOptions`
-
-```typescript
-interface AttestOptions {
-  model: string;          // Model identifier (e.g. 'gpt-4o', 'claude-3-5-sonnet')
-  prompt: string;         // Input to the model
-  response: string;       // Model's output
-  metadata?: Record<string, unknown>;  // Optional structured metadata
-  gasLimit?: bigint;      // Override gas limit
-}
-```
-
-#### Returns: `Attestation`
-
-```typescript
-interface Attestation {
-  id: string;           // bytes32 attestation ID (hex)
-  txHash: string;       // Transaction hash
-  blockNumber: number;  // Block where tx was mined
-  timestamp: number;    // Unix timestamp
-  attester: string;     // Address that submitted
-  modelId: string;      // Model identifier
-  inputHash: string;    // keccak256 of prompt
-  outputHash: string;   // keccak256 of response
-  proofHash: string;    // ZK proof hash
-  valid: boolean;       // Proof validity
-}
-```
-
-#### Example
+Submit an AI inference attestation on-chain.
 
 ```typescript
 const result = await client.attest({
   model: 'gpt-4o',
-  prompt: 'What is 2+2?',
-  response: '4',
-  metadata: { temperature: 0.7, tokens: 12 }
+  prompt: 'Your prompt',
+  response: 'Model response',
 });
+```
 
-console.log(result.id);      // 0x3f4a...c9d2
-console.log(result.valid);   // true
+**Params:**
+
+| Field | Type | Description |
+|---|---|---|
+| `model` | `string` | Model identifier (e.g. `'gpt-4o'`, `'claude-3-5-sonnet'`) |
+| `prompt` | `string` | Raw input prompt |
+| `response` | `string` | Raw model output |
+| `metadata?` | `object` | Optional key/value metadata |
+
+**Returns: `AttestationResult`**
+
+```typescript
+interface AttestationResult {
+  id: string;          // bytes32 attestation ID (hex)
+  txHash: string;      // transaction hash
+  blockNumber: number; // block where attestation was mined
+  timestamp: number;   // unix timestamp
+  gasUsed: bigint;     // gas consumed
+}
 ```
 
 ---
+
+### `submitProof(params)`
+
+Submit a ZK proof commitment for an existing attestation.
+
+```typescript
+await client.submitProof({
+  attestationId: result.id,
+  proofHash: '0x...',       // keccak256 of the full proof bytes
+  publicInputsHash: '0x...',// keccak256(modelHash ++ outputHash)
+});
+```
+
+**Params:**
+
+| Field | Type | Description |
+|---|---|---|
+| `attestationId` | `string` | ID from `attest()` |
+| `proofHash` | `string` | keccak256 hash of proof bytes |
+| `publicInputsHash` | `string` | keccak256 of public inputs |
+
+---
+
+## Read Methods
 
 ### `verify(attestationId)`
 
 Check if an attestation is valid.
 
 ```typescript
-async verify(attestationId: string): Promise<boolean>
-```
-
-#### Example
-
-```typescript
-const valid = await client.verify('0x3f4a...c9d2');
-// → true
+const isValid = await client.verify('0x3f4a...');
+// Returns: true | false
 ```
 
 ---
 
 ### `getAttestation(id)`
 
-Retrieve the full attestation record.
+Fetch a full attestation record.
 
 ```typescript
-async getAttestation(id: string): Promise<Attestation>
+const att = await client.getAttestation('0x3f4a...');
 ```
 
-#### Example
+**Returns: `Attestation`**
 
 ```typescript
-const record = await client.getAttestation('0x3f4a...c9d2');
-console.log(record.timestamp);  // 1717689600
-console.log(record.modelId);    // 'gpt-4o'
-```
-
----
-
-### `listAttestations(filter?)`
-
-Query attestations with optional filters.
-
-```typescript
-async listAttestations(filter?: AttestationFilter): Promise<Attestation[]>
-```
-
-#### `AttestationFilter`
-
-```typescript
-interface AttestationFilter {
-  attester?: string;    // Filter by attester address
-  model?: string;       // Filter by model ID
-  from?: number;        // Unix timestamp start
-  to?: number;          // Unix timestamp end
-  limit?: number;       // Max results (default: 100)
-  offset?: number;      // Pagination offset
+interface Attestation {
+  id: string;
+  attester: string;       // address that submitted
+  modelId: string;        // model identifier
+  inputHash: string;      // keccak256(prompt)
+  outputHash: string;     // keccak256(response)
+  proofHash: string;      // keccak256(zkProof)
+  timestamp: number;      // unix timestamp
+  blockNumber: number;
+  valid: boolean;
 }
 ```
 
-#### Example
+---
+
+### `getProof(attestationId)`
+
+Fetch a ZK proof record.
 
 ```typescript
-const attestations = await client.listAttestations({
-  model: 'gpt-4o',
-  limit: 20,
-});
+const proof = await client.getProof(attestationId);
+```
+
+**Returns: `ZKProof`**
+
+```typescript
+interface ZKProof {
+  id: string;              // proof ID
+  attestationId: string;
+  proofHash: string;
+  publicInputsHash: string;
+  prover: string;          // address that submitted proof
+  timestamp: number;
+  valid: boolean;
+}
 ```
 
 ---
 
-### `watchAttestations(callback, filter?)`
+### `listAttestations(address)`
 
-Subscribe to new attestation events in real-time.
+Fetch all attestations submitted by an address.
 
 ```typescript
-watchAttestations(
-  callback: (attestation: Attestation) => void,
-  filter?: AttestationFilter
-): Unsubscribe
+const attestations = await client.listAttestations('0xabc...');
+// Returns: Attestation[]
 ```
 
-#### Example
+---
+
+### `watchAttestations(callback)`
+
+Listen for new attestations in real-time.
 
 ```typescript
-const unsubscribe = client.watchAttestations((att) => {
-  console.log('New attestation:', att.id);
-}, { model: 'gpt-4o' });
+const unsubscribe = client.watchAttestations((attestation) => {
+  console.log('New attestation:', attestation.id);
+  console.log('Model:', attestation.modelId);
+});
 
-// Later:
+// Stop listening
 unsubscribe();
 ```
 
 ---
 
-## Errors
+### `totalAttestations()`
 
-All methods throw typed errors:
+Get total attestation count from the registry.
 
 ```typescript
-import { VerifiedAIError } from 'verified-ai-sdk';
-
-try {
-  await client.verify('0xinvalid');
-} catch (e) {
-  if (e instanceof VerifiedAIError) {
-    console.log(e.code);    // 'INVALID_ID' | 'NOT_FOUND' | 'NETWORK_ERROR' | ...
-    console.log(e.message); // Human-readable message
-  }
-}
+const total = await client.totalAttestations();
+console.log('Total:', total.toString());
 ```
-
-### Error Codes
-
-| Code | Description |
-|---|---|
-| `INVALID_ID` | Attestation ID format invalid |
-| `NOT_FOUND` | Attestation not found on-chain |
-| `PROOF_INVALID` | ZK proof failed verification |
-| `NETWORK_ERROR` | RPC / network failure |
-| `TX_FAILED` | Transaction reverted |
-| `TIMEOUT` | Request exceeded timeout |
 
 ---
 
-## TypeScript Types
+## Types
 
 ```typescript
-import type {
-  ClientConfig,
-  AttestOptions,
-  Attestation,
-  AttestationFilter,
-  VerifiedAIError,
-} from 'verified-ai-sdk';
+type Network = 'base-mainnet' | 'base-sepolia';
+
+interface VerifiedAIConfig {
+  network: Network;
+  privateKey?: string;
+  rpcUrl?: string;
+}
+
+interface AttestParams {
+  model: string;
+  prompt: string;
+  response: string;
+  metadata?: Record<string, string>;
+}
+
+interface AttestationResult {
+  id: string;
+  txHash: string;
+  blockNumber: number;
+  timestamp: number;
+  gasUsed: bigint;
+}
+
+interface Attestation {
+  id: string;
+  attester: string;
+  modelId: string;
+  inputHash: string;
+  outputHash: string;
+  proofHash: string;
+  timestamp: number;
+  blockNumber: number;
+  valid: boolean;
+}
+
+interface ZKProof {
+  id: string;
+  attestationId: string;
+  proofHash: string;
+  publicInputsHash: string;
+  prover: string;
+  timestamp: number;
+  valid: boolean;
+}
+```
+
+---
+
+## Contract Addresses
+
+```typescript
+import { CONTRACTS } from 'verified-ai-sdk';
+
+CONTRACTS['base-mainnet'].registry
+// '0x3dBF622ABC705d2Ec0E07EB0fCbb1AbFDe0281eb'
+
+CONTRACTS['base-mainnet'].verifier
+// '0xc303124d9276Ea7D3d75E94cE7fE5bd3DBec85d3'
+```
+
+---
+
+## Error handling
+
+```typescript
+import { VerifiedAIError, ErrorCode } from 'verified-ai-sdk';
+
+try {
+  const result = await client.attest({ model, prompt, response });
+} catch (err) {
+  if (err instanceof VerifiedAIError) {
+    switch (err.code) {
+      case ErrorCode.INSUFFICIENT_GAS:
+        console.error('Not enough ETH for gas');
+        break;
+      case ErrorCode.INVALID_PROOF:
+        console.error('ZK proof validation failed');
+        break;
+      case ErrorCode.ATTESTATION_NOT_FOUND:
+        console.error('Attestation ID does not exist');
+        break;
+    }
+  }
+}
 ```
