@@ -18,7 +18,7 @@
 
 <br/>
 
-[**Docs**](docs/README.md) · [**Quick Start**](#-quick-start) · [**Contracts**](#-contracts) · [**Architecture**](docs/architecture.md) · [**Examples**](docs/examples.md) · [**FAQ**](docs/faq.md)
+[**Docs**](https://neuro-8.gitbook.io/verified-ai/) · [**Quick Start**](#-quick-start) · [**Contracts**](#-contracts) · [**Architecture**](docs/architecture.md) · [**Examples**](docs/examples.md) · [**FAQ**](docs/faq.md)
 
 </div>
 
@@ -226,14 +226,14 @@ Full ABI and direct integration → [docs/contracts.md](docs/contracts.md)
 
 | Guide | What's inside |
 |---|---|
-| [Getting Started](docs/getting-started.md) | Install, wallet setup, first attestation |
-| [Architecture](docs/architecture.md) | System diagram, data flow, trust model, gas table |
-| [SDK Reference](docs/sdk-reference.md) | Full API, TypeScript types, error codes |
-| [Contracts](docs/contracts.md) | ABI, events, ethers.js integration, security |
-| [ZK Proofs](docs/zk-proofs.md) | Proof system, circuit design, privacy model |
-| [Examples](docs/examples.md) | Next.js, batch, agent-to-agent, CLI, events |
-| [FAQ](docs/faq.md) | Common questions answered |
-| [Contributing](docs/contributing.md) | Setup, coding standards, PR process |
+| [Getting Started](https://neuro-8.gitbook.io/verified-ai/getting-started/getting-started) | Install, wallet setup, first attestation |
+| [Architecture](https://neuro-8.gitbook.io/verified-ai/core-concepts/architecture) | System diagram, data flow, trust model, gas table |
+| [SDK Reference](https://neuro-8.gitbook.io/verified-ai/reference/sdk-reference) | Full API, TypeScript types, error codes |
+| [Contracts](https://neuro-8.gitbook.io/verified-ai/reference/smart-contracts) | ABI, events, ethers.js integration, security |
+| [ZK Proofs](https://neuro-8.gitbook.io/verified-ai/core-concepts/zk-proof-system) | Proof system, circuit design, privacy model |
+| [Examples](https://neuro-8.gitbook.io/verified-ai/guides/examples) | Next.js, batch, agent-to-agent, CLI, events |
+| [FAQ](https://neuro-8.gitbook.io/verified-ai/community/faq) | Common questions answered |
+| [Contributing](https://neuro-8.gitbook.io/verified-ai/community/contributing) | Setup, coding standards, PR process |
 
 ---
 
@@ -287,6 +287,7 @@ MIT — see [LICENSE](LICENSE)
 Built on [Base](https://base.org) &nbsp;·&nbsp;
 [AttestationRegistry](https://basescan.org/address/0x3dBF622ABC705d2Ec0E07EB0fCbb1AbFDe0281eb) &nbsp;·&nbsp;
 [ZKVerifier](https://basescan.org/address/0xc303124d9276Ea7D3d75E94cE7fE5bd3DBec85d3) &nbsp;·&nbsp;
+[Docs](https://neuro-8.gitbook.io/verified-ai/) &nbsp;·&nbsp;
 [MIT License](LICENSE)
 
 </div>
