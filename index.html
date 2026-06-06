@@ -524,6 +524,137 @@
     .footer-links a { transition: color 0.2s; }
     .footer-links a:hover { color: var(--text); }
 
+    /* ─── WHAT IS ─── */
+    .what-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-top: 2.5rem;
+    }
+    .what-card {
+      padding: 2.25rem 2rem;
+      background: var(--bg);
+      transition: background 0.25s;
+    }
+    .what-card:hover { background: var(--surface); }
+    .what-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      display: inline-block;
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      margin-bottom: 0.85rem;
+    }
+    .what-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.6rem;
+    }
+    .what-card p {
+      font-size: 0.82rem;
+      color: var(--text2);
+      line-height: 1.7;
+    }
+    .formula {
+      margin-top: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+    .formula-row {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-bottom: 0.35rem;
+    }
+    .formula-fn { color: #64d2ff; }
+    .formula-arg { color: #30d158; }
+    .formula-arrow { color: var(--muted); }
+    .formula-out { color: var(--text); }
+    .formula-chain {
+      margin-top: 0.6rem;
+      color: var(--muted);
+      font-size: 0.65rem;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      padding-top: 0.5rem;
+    }
+
+    /* ─── HOW TO USE ─── */
+    .howto-steps {
+      margin-top: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .howto-step {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.2s;
+    }
+    .howto-step:last-child { border-bottom: none; }
+    .howto-step:hover { background: var(--surface); }
+    .howto-num {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 2rem 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--accent);
+      border-right: 1px solid var(--border);
+      letter-spacing: 0.05em;
+    }
+    .howto-content {
+      padding: 2rem 2rem 2rem 2rem;
+    }
+    .howto-content h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.35rem;
+    }
+    .howto-content > p {
+      font-size: 0.82rem;
+      color: var(--text2);
+      line-height: 1.65;
+    }
+    .howto-content code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      background: var(--surface2);
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .howto-cta {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 2rem;
+    }
+    @media (max-width: 768px) {
+      .what-grid { grid-template-columns: 1fr; }
+      .howto-step { grid-template-columns: 48px 1fr; }
+    }
+
     /* ─── FADE ─── */
     .fade-in {
       opacity: 0;
@@ -563,7 +694,8 @@
       </div>
       <div class="nav-right">
         <div class="nav-links">
-          <a href="#how-it-works">How it works</a>
+          <a href="#what-is">What is it</a>
+          <a href="#how-to-use">How to use</a>
           <a href="#contracts">Contracts</a>
           <a href="#integrate">SDK</a>
           <a href="https://neuro-8.gitbook.io/verified-ai/" target="_blank">Docs</a>
@@ -605,6 +737,155 @@
     </div>
   </div>
 </div>
+
+<hr />
+
+<!-- ─── WHAT IS VERIFIED AI ─── -->
+<section id="what-is">
+  <div class="container">
+    <p class="section-eyebrow">What is Verified AI</p>
+    <h2 class="section-title fade-in">On-chain proof that your AI<br/>actually ran — exactly as claimed.</h2>
+    <p class="section-desc fade-in" style="max-width:600px">AI systems are making consequential decisions — loan approvals, medical triage, legal analysis — but there's no way to prove which model ran, what input it received, or what output it produced. Without that proof, AI accountability is theater.</p>
+    <div class="what-grid fade-in">
+      <div class="what-card">
+        <div class="what-label">The Problem</div>
+        <h3>AI outputs are unverifiable</h3>
+        <p>Any bad actor can claim their output came from GPT-4o, Claude, or any other model. There's no cryptographic link between a model, its input, and its output — until now.</p>
+      </div>
+      <div class="what-card">
+        <div class="what-label">The Solution</div>
+        <h3>Immutable on-chain attestations</h3>
+        <p>Verified AI hashes both the prompt and response, generates a Groth16 zkML proof, and anchors everything permanently to Base mainnet. Permissionless to read. Impossible to forge.</p>
+      </div>
+      <div class="what-card">
+        <div class="what-label">How it works</div>
+        <h3>Three cryptographic commitments</h3>
+        <div class="formula">
+          <div class="formula-row"><span class="formula-fn">keccak256</span><span class="formula-arg">(prompt)</span><span class="formula-arrow">→</span><span class="formula-out">inputHash</span></div>
+          <div class="formula-row"><span class="formula-fn">keccak256</span><span class="formula-arg">(response)</span><span class="formula-arrow">→</span><span class="formula-out">outputHash</span></div>
+          <div class="formula-row"><span class="formula-fn">Groth16</span><span class="formula-arg">(π)</span><span class="formula-arrow">→</span><span class="formula-out">proofHash</span></div>
+          <div class="formula-chain">↓ stored in AttestationRegistry on Base mainnet ↓</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr />
+
+<!-- ─── HOW TO USE ─── -->
+<section id="how-to-use">
+  <div class="container">
+    <p class="section-eyebrow">How to Use</p>
+    <h2 class="section-title fade-in">From zero to verified in 5 minutes</h2>
+    <p class="section-desc fade-in">Install the SDK, attest your first inference, verify on-chain. That's it.</p>
+    <div class="howto-steps fade-in">
+      <div class="howto-step">
+        <div class="howto-num">01</div>
+        <div class="howto-content">
+          <h4>Install the SDK</h4>
+          <p>Add <code>verified-ai-sdk</code> to your project via npm or yarn.</p>
+          <div class="code-block" style="margin-top:1rem">
+            <div class="code-bar">
+              <div class="code-bar-left"><div class="mac-dots"><span></span><span></span><span></span></div><span class="code-filename">terminal</span></div>
+              <span class="code-lang">Shell</span>
+            </div>
+            <div class="code-body"><pre>npm install verified-ai-sdk</pre></div>
+          </div>
+        </div>
+      </div>
+      <div class="howto-step">
+        <div class="howto-num">02</div>
+        <div class="howto-content">
+          <h4>Connect your wallet</h4>
+          <p>You need a Base mainnet wallet with a small amount of ETH (gas is ~$0.002 per attestation).</p>
+          <div class="code-block" style="margin-top:1rem">
+            <div class="code-bar">
+              <div class="code-bar-left"><div class="mac-dots"><span></span><span></span><span></span></div><span class="code-filename">client.ts</span></div>
+              <span class="code-lang">TypeScript</span>
+            </div>
+            <div class="code-body"><pre><span class="kw">import</span> { VerifiedAI } <span class="kw">from</span> <span class="str">'verified-ai-sdk'</span>
+
+<span class="kw">const</span> client = <span class="kw">new</span> <span class="fn">VerifiedAI</span>({
+  network:    <span class="str">'base-mainnet'</span>,
+  privateKey: process.env.<span class="type">PRIVATE_KEY</span>, <span class="cm">// your Base wallet key</span>
+})</pre></div>
+          </div>
+        </div>
+      </div>
+      <div class="howto-step">
+        <div class="howto-num">03</div>
+        <div class="howto-content">
+          <h4>Attest an inference</h4>
+          <p>After your AI model responds, submit the model ID, prompt, and response. The SDK hashes and signs everything, then writes to chain.</p>
+          <div class="code-block" style="margin-top:1rem">
+            <div class="code-bar">
+              <div class="code-bar-left"><div class="mac-dots"><span></span><span></span><span></span></div><span class="code-filename">attest.ts</span></div>
+              <span class="code-lang">TypeScript</span>
+            </div>
+            <div class="code-body"><pre><span class="kw">const</span> result = <span class="kw">await</span> client.<span class="fn">attest</span>({
+  model:    <span class="str">'gpt-4o'</span>,          <span class="cm">// model identifier</span>
+  prompt:   userPrompt,         <span class="cm">// raw prompt string</span>
+  response: modelResponse,      <span class="cm">// raw response string</span>
+})
+
+console.<span class="fn">log</span>(result.id)      <span class="cm">// bytes32 — permanent on-chain ID</span>
+console.<span class="fn">log</span>(result.txHash)  <span class="cm">// basescan.org/tx/0x...</span></pre></div>
+          </div>
+        </div>
+      </div>
+      <div class="howto-step">
+        <div class="howto-num">04</div>
+        <div class="howto-content">
+          <h4>Verify any attestation</h4>
+          <p>Anyone — no private key needed — can verify an attestation ID trustlessly. Works from any environment, direct RPC, or on-chain from another contract.</p>
+          <div class="code-block" style="margin-top:1rem">
+            <div class="code-bar">
+              <div class="code-bar-left"><div class="mac-dots"><span></span><span></span><span></span></div><span class="code-filename">verify.ts</span></div>
+              <span class="code-lang">TypeScript</span>
+            </div>
+            <div class="code-body"><pre><span class="cm">// Read-only — no wallet or key needed</span>
+<span class="kw">const</span> readClient = <span class="kw">new</span> <span class="fn">VerifiedAI</span>({ network: <span class="str">'base-mainnet'</span> })
+
+<span class="kw">const</span> isValid = <span class="kw">await</span> readClient.<span class="fn">verify</span>(attestationId)
+console.<span class="fn">log</span>(isValid) <span class="cm">// true</span>
+
+<span class="kw">const</span> record = <span class="kw">await</span> readClient.<span class="fn">getAttestation</span>(attestationId)
+console.<span class="fn">log</span>(record.modelId)   <span class="cm">// 'gpt-4o'</span>
+console.<span class="fn">log</span>(record.attester)  <span class="cm">// 0x... (submitter address)</span>
+console.<span class="fn">log</span>(record.timestamp) <span class="cm">// unix timestamp on Base</span></pre></div>
+          </div>
+        </div>
+      </div>
+      <div class="howto-step">
+        <div class="howto-num">05</div>
+        <div class="howto-content">
+          <h4>Submit a ZK proof (optional)</h4>
+          <p>For maximum verifiability, link a Groth16 zkML proof to the attestation. Proof commitment stored on ZKVerifier contract.</p>
+          <div class="code-block" style="margin-top:1rem">
+            <div class="code-bar">
+              <div class="code-bar-left"><div class="mac-dots"><span></span><span></span><span></span></div><span class="code-filename">proof.ts</span></div>
+              <span class="code-lang">TypeScript</span>
+            </div>
+            <div class="code-body"><pre><span class="kw">await</span> client.<span class="fn">submitProof</span>({
+  attestationId: result.id,
+  proof:         groth16ProofBytes, <span class="cm">// from Lagrange DeepProve</span>
+  publicInputs:  publicInputsHash,
+})
+
+<span class="cm">// Verify the proof exists on-chain</span>
+<span class="kw">const</span> hasProof = <span class="kw">await</span> readClient.<span class="fn">verifyProof</span>(result.id)
+console.<span class="fn">log</span>(hasProof) <span class="cm">// true</span></pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="howto-cta fade-in">
+      <a href="https://neuro-8.gitbook.io/verified-ai/getting-started/getting-started" class="btn btn-primary" target="_blank">Full getting started guide →</a>
+      <a href="https://neuro-8.gitbook.io/verified-ai/reference/sdk-reference" class="btn btn-outline" target="_blank">SDK reference</a>
+    </div>
+  </div>
+</section>
 
 <hr />
 
