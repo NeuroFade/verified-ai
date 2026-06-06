@@ -1,0 +1,16 @@
+Verified AI — Deployer Wallet
+==============================
+Address:     0xB643Bfe37A25A71c60EC3348e5999A21A0cA274D
+Private key: 0xd3546322d9b642be813b4671958a073aad6d8aa0308b48a4e9ac34db44e313b1
+
+Status: Needs 0.01 ETH on Base Sepolia to deploy
+Faucet: https://www.coinbase.com/faucets/base-ethereum-sepolia-faucet
+
+After funded, deploy with:
+  export PATH="$HOME/.foundry/bin:$PATH"
+  export PRIVATE_KEY=0xd3546322d9b642be813b4671958a073aad6d8aa0308b48a4e9ac34db44e313b1
+  cd ~/verified-ai
+  forge create \
+    --rpc-url https://sepolia.base.org \
+    --private-key $PRIVATE_KEY \
+    src/AttestationRegistry.sol:AttestationRegistry
