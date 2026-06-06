@@ -1,261 +1,278 @@
+<div align="center">
+
+<img src="./logo.jpg" alt="Verified AI" width="96" height="96" />
+
 # Verified AI
 
-> **On-chain attestation and zkML proof verification for AI inference.**  
-> SSL certificates for the age of agents.
+**On-chain attestation and zkML proof verification for AI inference.**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-white.svg)](LICENSE)
-[![Built on Base](https://img.shields.io/badge/Built%20on-Base-0052FF.svg)](https://base.org)
-[![Solidity](https://img.shields.io/badge/Solidity-0.8.24-gray.svg)](https://soliditylang.org)
-[![Deployed](https://img.shields.io/badge/Status-Mainnet-30d158.svg)](#contracts)
+*SSL certificates for the age of agents.*
+
+<br/>
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-white.svg?style=flat-square)](LICENSE)
+[![Built on Base](https://img.shields.io/badge/Built%20on-Base-0052FF.svg?style=flat-square&logo=ethereum)](https://base.org)
+[![Solidity](https://img.shields.io/badge/Solidity-0.8.24-363636.svg?style=flat-square)](https://soliditylang.org)
+[![Status](https://img.shields.io/badge/Mainnet-Live-30d158.svg?style=flat-square)](#-contracts)
+[![npm](https://img.shields.io/badge/npm-verified--ai--sdk-cb0000.svg?style=flat-square)](https://npmjs.com/package/verified-ai-sdk)
+
+<br/>
+
+[**Docs**](docs/README.md) · [**Quick Start**](#-quick-start) · [**Contracts**](#-contracts) · [**Architecture**](docs/architecture.md) · [**Examples**](docs/examples.md) · [**FAQ**](docs/faq.md)
+
+</div>
 
 ---
 
-## What is Verified AI?
+## The problem
 
-AI systems are increasingly making consequential decisions — but there's no way to prove *which model* ran, *what input* it received, or *what output* it produced. Verified AI solves this with a two-contract system on Base:
+AI systems are making consequential decisions — loan approvals, medical triage, legal analysis — but there's no way to prove **which model ran**, **what input it received**, or **what output it produced**.
 
-1. **AttestationRegistry** — immutable on-chain record for every AI inference
-2. **ZKVerifier** — validates zkML proof commitments without revealing model weights
+Without that proof, AI accountability is theater.
 
-The result: cryptographic proof that a specific AI model produced a specific output, verifiable by anyone, trusted by no one.
+## The solution
+
+Verified AI anchors every AI inference to an immutable on-chain record:
+
+```
+keccak256(prompt)   →  inputHash   ─┐
+keccak256(response) →  outputHash  ─┼─▶ AttestationRegistry (Base mainnet)
+Groth16(π)          →  proofHash   ─┘         └── verifiable forever
+```
+
+Two deployed contracts. Permissionless reads. No trusted intermediary.
 
 ---
 
-## Contracts (Base Mainnet)
+## ✦ Contracts
 
-| Contract | Address | BaseScan |
+Deployed on **Base Mainnet** — cheap, fast, Ethereum-secured.
+
+| Contract | Address | Explorer |
 |---|---|---|
-| `AttestationRegistry` | `0x3dBF622ABC705d2Ec0E07EB0fCbb1AbFDe0281eb` | [View ↗](https://basescan.org/address/0x3dBF622ABC705d2Ec0E07EB0fCbb1AbFDe0281eb) |
-| `ZKVerifier` | `0xc303124d9276Ea7D3d75E94cE7fE5bd3DBec85d3` | [View ↗](https://basescan.org/address/0xc303124d9276Ea7D3d75E94cE7fE5bd3DBec85d3) |
+| `AttestationRegistry` | `0x3dBF622ABC705d2Ec0E07EB0fCbb1AbFDe0281eb` | [BaseScan ↗](https://basescan.org/address/0x3dBF622ABC705d2Ec0E07EB0fCbb1AbFDe0281eb) |
+| `ZKVerifier` | `0xc303124d9276Ea7D3d75E94cE7fE5bd3DBec85d3` | [BaseScan ↗](https://basescan.org/address/0xc303124d9276Ea7D3d75E94cE7fE5bd3DBec85d3) |
 
 ---
 
-## Architecture
-
-```
-Provider                  Chain                     Consumer
-   │                        │                           │
-   ├─ register()            │                           │
-   │  (model, TEE, url) ───▶│ AttestationRegistry       │
-   │                        │                           │
-   ├─ run inference         │                           │
-   ├─ generate zkML proof   │                           │
-   ├─ attest()             │                           │
-   │  (model, inputHash, ──▶│ AttestationRegistry       │
-   │   outputHash, proof)   │  └── stores attestation   │
-   │                        │                           │
-   ├─ submitProof()         │                           │
-   │  (attestationId,  ────▶│ ZKVerifier                │
-   │   proofHash,           │  └── validates + stores   │
-   │   publicInputsHash)    │                           │
-   │                        │                           │
-   │                        │◀──── verify(id) ─────────┤
-   │                        │       └── true / false    │
-```
-
----
-
-## Quick Start
-
-### Install SDK
+## ⚡ Quick Start
 
 ```bash
 npm install verified-ai-sdk
 ```
 
-### Attest an inference
+**Attest an inference:**
 
 ```typescript
 import { VerifiedAI } from 'verified-ai-sdk';
 
 const client = new VerifiedAI({
   network: 'base-mainnet',
-  privateKey: process.env.PRIVATE_KEY!,
+  privateKey: process.env.PRIVATE_KEY,
 });
 
-// Attest — generates ZK proof + stores on-chain
 const result = await client.attest({
-  model: 'gpt-4o',
-  prompt: 'Explain quantum computing',
-  response: 'Quantum computing uses...',
+  model:    'gpt-4o',
+  prompt:   'Explain quantum computing in one sentence.',
+  response: 'Quantum computing uses qubits to process information...',
 });
 
-console.log('Attestation ID:', result.id);
-console.log('TX:', `https://basescan.org/tx/${result.txHash}`);
+console.log(result.id);     // bytes32 — permanent on-chain ID
+console.log(result.txHash); // basescan.org/tx/0x...
 ```
 
-### Verify any attestation
+**Verify any attestation (permissionless, no key needed):**
 
 ```typescript
-// Anyone can verify — no signer required
-const isValid = await client.verify(result.id);
-console.log(isValid); // true
+const client = new VerifiedAI({ network: 'base-mainnet' });
 
-const record = await client.getAttestation(result.id);
-console.log(record.modelId);    // 'gpt-4o'
-console.log(record.timestamp);  // block timestamp
-console.log(record.valid);      // true
-```
+const isValid = await client.verify(attestationId);   // true | false
+const record  = await client.getAttestation(attestationId);
 
-### Direct contract interaction (ethers.js)
-
-```typescript
-import { ethers } from 'ethers';
-
-const provider = new ethers.JsonRpcProvider('https://mainnet.base.org');
-const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
-
-const registry = new ethers.Contract(
-  '0x3dBF622ABC705d2Ec0E07EB0fCbb1AbFDe0281eb',
-  REGISTRY_ABI,
-  signer
-);
-
-const tx = await registry.attest(modelId, inputHash, outputHash, zkProof);
-await tx.wait();
+console.log(record.modelId);   // 'gpt-4o'
+console.log(record.attester);  // 0x... (who submitted)
+console.log(record.valid);     // true
 ```
 
 ---
 
-## SDK Reference
+## Architecture
 
-### `new VerifiedAI(config)`
-
-```typescript
-interface Config {
-  network: 'base-mainnet' | 'base-sepolia';
-  privateKey?: string;   // required for write ops
-  rpcUrl?: string;       // optional override
-}
+```
+  Provider                    Base Mainnet                   Consumer
+     │                             │                              │
+     │  attest(model, in, out, π)  │                              │
+     │────────────────────────────▶│  AttestationRegistry         │
+     │                             │  └─ stores record (immutable)│
+     │                             │                              │
+     │  submitProof(id, πHash, pub)│                              │
+     │────────────────────────────▶│  ZKVerifier                  │
+     │                             │  └─ stores commitment        │
+     │                             │                              │
+     │                             │◀──────── verify(id) ─────────│
+     │                             │          └─ true / false     │
+     │                             │                              │
 ```
 
-### Methods
+Full system design → [docs/architecture.md](docs/architecture.md)
 
-| Method | Description | Returns |
+---
+
+## SDK Methods
+
+| Method | Requires key | Description |
 |---|---|---|
-| `attest(params)` | Submit attestation + ZK proof | `AttestationResult` |
-| `verify(id)` | Check attestation validity | `boolean` |
-| `getAttestation(id)` | Fetch attestation record | `Attestation` |
-| `getProof(id)` | Fetch proof commitment | `ZKProof` |
-| `listAttestations(addr)` | All attestations by provider | `Attestation[]` |
-| `watchAttestations(cb)` | Real-time event listener | `() => void` |
+| `attest(params)` | ✅ | Submit inference attestation on-chain |
+| `submitProof(params)` | ✅ | Link a ZK proof commitment to an attestation |
+| `verify(id)` | ✗ | Returns `true` if attestation is valid |
+| `getAttestation(id)` | ✗ | Fetch full attestation record |
+| `getProof(id)` | ✗ | Fetch proof commitment |
+| `listAttestations(addr)` | ✗ | All attestations from an address |
+| `totalAttestations()` | ✗ | Registry total count |
+| `watchAttestations(cb)` | ✗ | Real-time event listener |
+
+Full API reference → [docs/sdk-reference.md](docs/sdk-reference.md)
 
 ---
 
 ## ZK Proof System
 
-Verified AI uses **Groth16** (BN254 curve) — the most gas-efficient proving system for on-chain verification:
+Verified AI uses **Groth16** on **BN254** — the most gas-efficient ZK proving system for EVM chains.
 
 | Property | Value |
 |---|---|
 | Proof size | ~256 bytes |
-| On-chain verification | ~250K gas |
+| On-chain verification gas | ~250,000 |
+| Cost per verification on Base | ~$0.005 |
 | Proving time | 2–10 seconds |
-| Setup | Hermez Phase 2 ceremony |
+| Trusted setup | Hermez Phase 2 ceremony (1,000+ participants) |
 
-Privacy guarantees:
-- ✅ **Public**: model ID, input hash, output hash, timestamp, validity
-- ❌ **Private**: model weights, raw prompt, raw response, system prompt
+**What stays private:**
+
+| On-chain (public) | Off-chain (private) |
+|---|---|
+| Model identifier | Model weights |
+| Input hash | Raw prompt |
+| Output hash | Raw response |
+| Attester address | System prompt |
+| Timestamp | User identity |
+
+Deep dive → [docs/zk-proofs.md](docs/zk-proofs.md)
 
 ---
 
-## Contracts
+## Contract Interfaces
 
 ### AttestationRegistry
 
 ```solidity
-// Submit an attestation
+/// @notice Submit an AI inference attestation
 function attest(
-    string calldata modelId,
-    bytes32 inputHash,
-    bytes32 outputHash,
-    bytes calldata zkProof
+    string  calldata modelId,
+    bytes32          inputHash,    // keccak256(prompt)
+    bytes32          outputHash,   // keccak256(response)
+    bytes   calldata zkProof
 ) external returns (bytes32 attestationId);
 
-// Query
-function getAttestation(bytes32 id) external view returns (Attestation memory);
+/// @notice Check attestation validity (permissionless)
 function verify(bytes32 id) external view returns (bool);
-function totalAttestations() external view returns (uint256);
+
+/// @notice Fetch full attestation record
+function getAttestation(bytes32 id) external view returns (Attestation memory);
 ```
 
 ### ZKVerifier
 
 ```solidity
-// Submit ZK proof
+/// @notice Submit a ZK proof commitment
 function submitProof(
     bytes32 attestationId,
-    bytes32 proofHash,
-    bytes32 publicInputsHash
+    bytes32 proofHash,         // keccak256(Groth16 proof bytes)
+    bytes32 publicInputsHash   // keccak256(modelHash ++ outputHash)
 ) external returns (bytes32 proofId);
 
-// Verify
+/// @notice Check if an attestation has a valid proof
 function verifyProof(bytes32 attestationId) external view returns (bool);
-function isProofVerified(bytes32 proofHash) external view returns (bool);
 ```
+
+Full ABI and direct integration → [docs/contracts.md](docs/contracts.md)
 
 ---
 
 ## Roadmap
 
-- [x] AttestationRegistry — Base mainnet
-- [x] ZKVerifier — Base mainnet
-- [x] TypeScript SDK (verified-ai-sdk)
-- [ ] Full Groth16 on-chain verifier
-- [ ] Lagrange DeepProve integration
-- [ ] Decentralized prover network
-- [ ] AgentCapabilityRegistry
-- [ ] AIActCompliance module
+**v1 — Shipped**
+- [x] `AttestationRegistry` — Base mainnet
+- [x] `ZKVerifier` — Base mainnet
+- [x] TypeScript SDK (`verified-ai-sdk`)
+- [x] Comprehensive documentation
+
+**v2 — In progress**
+- [ ] Full Groth16 pairing check on-chain
+- [ ] Lagrange DeepProve prover integration
+- [ ] Base Sepolia testnet deployment
 - [ ] Subgraph indexer
+
+**v3 — Planned**
+- [ ] Decentralized prover network
+- [ ] `AgentCapabilityRegistry`
+- [ ] `AIActCompliance` module
+- [ ] Cross-chain bridge (Ethereum mainnet)
 - [ ] REST API gateway
 
 ---
 
-## Docs
+## Documentation
 
-| Guide | Description |
+| Guide | What's inside |
 |---|---|
-| [Getting Started](docs/getting-started.md) | Install, configure, first attestation |
-| [SDK Reference](docs/sdk-reference.md) | Full API reference with types |
-| [Contracts](docs/contracts.md) | ABI, interfaces, deployment addresses |
-| [ZK Proofs](docs/zk-proofs.md) | ZK circuit design, proof flow, privacy model |
-| [Examples](docs/examples.md) | Real-world patterns: Next.js, CLI, batch, events |
+| [Getting Started](docs/getting-started.md) | Install, wallet setup, first attestation |
+| [Architecture](docs/architecture.md) | System diagram, data flow, trust model, gas table |
+| [SDK Reference](docs/sdk-reference.md) | Full API, TypeScript types, error codes |
+| [Contracts](docs/contracts.md) | ABI, events, ethers.js integration, security |
+| [ZK Proofs](docs/zk-proofs.md) | Proof system, circuit design, privacy model |
+| [Examples](docs/examples.md) | Next.js, batch, agent-to-agent, CLI, events |
+| [FAQ](docs/faq.md) | Common questions answered |
+| [Contributing](docs/contributing.md) | Setup, coding standards, PR process |
 
 ---
 
 ## Development
 
 ```bash
+# Clone
 git clone https://github.com/NeuroFade/verified-ai
 cd verified-ai
 
-# Install foundry
-curl -L https://foundry.paradigm.xyz | bash
-foundryup
+# Install Foundry
+curl -L https://foundry.paradigm.xyz | bash && foundryup
 
-# Build
+# Build contracts
 forge build
 
-# Test
-forge test
+# Run tests
+forge test -vv
 
-# Deploy (requires funded wallet)
-export PRIVATE_KEY=0x...
-forge create src/AttestationRegistry.sol:AttestationRegistry \
-  --rpc-url https://mainnet.base.org \
-  --private-key $PRIVATE_KEY \
-  --broadcast
+# Gas snapshot
+forge snapshot
 ```
 
----
+**Deploy to Base Sepolia (testnet):**
 
-## Contributing
+```bash
+export PRIVATE_KEY=0x...
 
-Pull requests welcome. Open an issue first for major changes.
+forge create src/AttestationRegistry.sol:AttestationRegistry \
+  --rpc-url https://sepolia.base.org \
+  --private-key $PRIVATE_KEY
 
-1. Fork the repo
-2. Create a feature branch (`git checkout -b feat/my-feature`)
-3. Commit with conventional commits
-4. Open a PR against `main`
+forge create src/ZKVerifier.sol:ZKVerifier \
+  --rpc-url https://sepolia.base.org \
+  --private-key $PRIVATE_KEY \
+  --constructor-args <REGISTRY_ADDRESS>
+```
+
+Contributing guide → [docs/contributing.md](docs/contributing.md)
 
 ---
 
@@ -265,8 +282,11 @@ MIT — see [LICENSE](LICENSE)
 
 ---
 
-<p align="center">
-  Built on <a href="https://base.org">Base</a> · 
-  <a href="https://basescan.org/address/0x3dBF622ABC705d2Ec0E07EB0fCbb1AbFDe0281eb">AttestationRegistry</a> · 
-  <a href="https://basescan.org/address/0xc303124d9276Ea7D3d75E94cE7fE5bd3DBec85d3">ZKVerifier</a>
-</p>
+<div align="center">
+
+Built on [Base](https://base.org) &nbsp;·&nbsp;
+[AttestationRegistry](https://basescan.org/address/0x3dBF622ABC705d2Ec0E07EB0fCbb1AbFDe0281eb) &nbsp;·&nbsp;
+[ZKVerifier](https://basescan.org/address/0xc303124d9276Ea7D3d75E94cE7fE5bd3DBec85d3) &nbsp;·&nbsp;
+[MIT License](LICENSE)
+
+</div>
