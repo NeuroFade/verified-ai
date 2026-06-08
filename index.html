@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Verified AI — On-chain attestation for AI inference</title>
+  <title>Verified AI — On-chain attestation for AI inference | ERC-8004</title>
   <meta name="description" content="Cryptographic proof that your AI model ran. On-chain attestation layer for AI inference on Base." />
   <meta property="og:title" content="Verified AI" />
   <meta property="og:description" content="On-chain attestation layer for AI inference. Prove your model ran." />
@@ -29,6 +29,91 @@
     }
 
     html { scroll-behavior: smooth; }
+
+    /* ─── ENHANCED ANIMATIONS ─── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.92); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .animate-fade-up { animation: fadeUp 0.7s ease-out forwards; opacity: 0; }
+    .animate-scale { animation: scaleIn 0.6s ease-out forwards; opacity: 0; }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+
+    /* ─── FAQ SECTION ─── */
+    .faq-list { margin-top: 2.5rem; }
+    .faq-item { 
+      border-bottom: 1px solid var(--border); 
+      padding: 1.25rem 0;
+    }
+    .faq-item:first-child { border-top: 1px solid var(--border); }
+    .faq-q { 
+      font-weight: 500; 
+      font-size: 1.05rem; 
+      cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .faq-q::after { 
+      content: '+'; font-size: 1.4rem; color: var(--muted); transition: transform 0.3s; 
+    }
+    .faq-item.open .faq-q::after { transform: rotate(45deg); }
+    .faq-a { 
+      margin-top: 0.75rem; 
+      color: var(--text2); 
+      font-size: 0.92rem; 
+      line-height: 1.7;
+      display: none;
+    }
+    .faq-item.open .faq-a { display: block; }
+
+    /* ─── PARTNERS LOGOS ─── */
+    .partners-grid {
+      display: flex; flex-wrap: wrap;
+      justify-content: center; gap: 2.5rem;
+      margin-top: 2.5rem; opacity: 0.7;
+    }
+    .partner-logo {
+      font-size: 1.1rem; font-weight: 600;
+      color: var(--muted); letter-spacing: 0.05em;
+    }
+
+    /* ─── COMPARISON TABLE ─── */
+    .comp-table-wrap { overflow-x: auto; margin-top: 2rem; }
+    .comp-table {
+      width: 100%; border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    .comp-table th, .comp-table td {
+      padding: 1rem 1.25rem; text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .comp-table th { 
+      color: var(--text2); font-weight: 500; font-size: 0.75rem;
+      text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .comp-table td:first-child { color: var(--text); font-weight: 500; }
+    .comp-check { color: #30d158; }
+    .comp-cross { color: #ff5f57; }
+
+    /* ─── STATS ANIMATE ON VIEW ─── */
+    .stat-val { 
+      display: inline-block;
+      background: linear-gradient(135deg, var(--accent), #bf5af2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
 
     body {
       background: var(--bg);
@@ -1197,6 +1282,44 @@ console.<span class="fn">log</span>(<span class="str">'Proof on-chain:'</span>, 
 <hr />
 
 <!-- ─── TOKEN ─── -->
+<section id="partners">
+  <div class="container" style="text-align:center">
+    <p class="section-eyebrow">Built with</p>
+    <div class="partners-grid fade-in">
+      <span class="partner-logo">BASE</span>
+      <span class="partner-logo">UNISWAP</span>
+      <span class="partner-logo">FOUNDRY</span>
+      <span class="partner-logo">OPENZEPPELIN</span>
+    </div>
+  </div>
+</section>
+
+<hr />
+
+<section id="compare">
+  <div class="container">
+    <p class="section-eyebrow">Comparison</p>
+    <h2 class="section-title fade-in">How we stack up</h2>
+    <div class="comp-table-wrap fade-in">
+      <table class="comp-table">
+        <thead>
+          <tr><th></th><th>Verified AI</th><th>Credential</th><th>Proof Protocol</th><th>Traditional Logs</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>On-chain proof</td><td class="comp-check">✓</td><td class="comp-cross">✗</td><td class="comp-cross">✗</td><td class="comp-cross">✗</td></tr>
+          <tr><td>TEE attestation</td><td class="comp-check">✓</td><td class="comp-check">✓</td><td class="comp-check">✓</td><td class="comp-cross">✗</td></tr>
+          <tr><td>ZK proof link</td><td class="comp-check">✓</td><td class="comp-cross">✗</td><td class="comp-check">✓</td><td class="comp-cross">✗</td></tr>
+          <tr><td>ERC-8004 agents</td><td class="comp-check">✓</td><td class="comp-cross">✗</td><td class="comp-cross">✗</td><td class="comp-cross">✗</td></tr>
+          <tr><td>x402 payments</td><td class="comp-check">✓</td><td class="comp-cross">✗</td><td class="comp-cross">✗</td><td class="comp-cross">✗</td></tr>
+          <tr><td>EU AI Act</td><td class="comp-check">✓</td><td class="comp-cross">✗</td><td class="comp-cross">✗</td><td class="comp-cross">✗</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<hr />
+
 <section id="token">
   <div class="container">
     <p class="section-eyebrow">Token</p>
@@ -1312,6 +1435,33 @@ console.<span class="fn">log</span>(<span class="str">'Proof on-chain:'</span>, 
 <hr />
 
 <!-- ─── INTEGRATE ─── -->
+<section id="faq">
+  <div class="container">
+    <p class="section-eyebrow">FAQ</p>
+    <h2 class="section-title fade-in">Questions answered</h2>
+    <div class="faq-list fade-in">
+      <div class="faq-item">
+        <div class="faq-q">Why on-chain attestation?</div>
+        <div class="faq-a">On-chain attestation provides cryptographic proof that your AI model actually ran — not just a log entry, but an immutable record verifiable by anyone. This enables trustless AI marketplaces, verifiable credentials, and regulatory compliance.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How much does it cost?</div>
+        <div class="faq-a">~$0.002 per attestation on Base (≈21K gas). That's ~$0.50 for 250 attestations. ZK proofs are optional and stored off-chain.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Do I need the SDK?</div>
+        <div class="faq-a">No. The SDK is optional. You can integrate directly via ethers.js v6 or viem — the landing page shows both. The contracts are plain Solidity, verified on BaseScan.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Is this EU AI Act compliant?</div>
+        <div class="faq-a">Yes. The AIActCompliance module (Article 10, 13, 17) is included. Deadline is August 2, 2026 for high-risk systems.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr />
+
 <section id="integrate">
   <div class="container">
     <p class="section-eyebrow">Integration</p>
@@ -1419,6 +1569,22 @@ document.querySelectorAll('.code-tabs').forEach(tabs => {
       const target = block.querySelector('.code-panel[data-tab="' + tab.dataset.tab + '"]');
       if (target) target.classList.add('active');
     });
+  });
+});
+</script>
+<script>
+// FAQ toggle
+document.querySelectorAll('.faq-q').forEach(q => {
+  q.addEventListener('click', () => {
+    q.parentElement.classList.toggle('open');
+  });
+});
+</script>
+<script>
+// FAQ toggle
+document.querySelectorAll('.faq-q').forEach(q => {
+  q.addEventListener('click', () => {
+    q.parentElement.classList.toggle('open');
   });
 });
 </script>
