@@ -246,7 +246,7 @@
       font-weight: 400;
       letter-spacing: -0.01em;
     }
-    .hero-actions {
+    .hero-actions { flex-wrap: wrap;
       display: flex;
       gap: 0.75rem;
       justify-content: center;
@@ -617,7 +617,7 @@
       gap: 0.5rem;
     }
     .footer-left img { width: 18px; height: 18px; border-radius: 3px; opacity: 0.6; }
-    .footer-links { display: flex; gap: 1.5rem; }
+    .footer-links { display: flex; flex-wrap: wrap; display: flex; gap: 1.5rem; }
     .footer-links a { transition: color 0.2s; }
     .footer-links a:hover { color: var(--text); }
 
@@ -760,21 +760,80 @@
     }
     .fade-in.visible { opacity: 1; transform: none; }
 
-    /* ─── RESPONSIVE ─── */
-    @media (max-width: 768px) {
-      .container { padding: 0 1.25rem; }
-      .hero { padding: 6rem 0 4.5rem; }
-      .nav-links { display: none; }
-      .flow { grid-template-columns: 1fr 1fr; }
-      .flow-step { border-bottom: 1px solid var(--border); }
-      .contracts-grid { grid-template-columns: 1fr; }
-      .stats-grid { grid-template-columns: 1fr 1fr; }
-      .usecases-grid { grid-template-columns: 1fr; }
-      .footer-inner { flex-direction: column; gap: 1rem; text-align: center; }
+    /* ─── RESPONSIVE TABLET (≤1024px) ─── */
+    @media (max-width: 1024px) {
+      .contracts-grid { grid-template-columns: 1fr 1fr !important; }
+      .usecases-grid  { grid-template-columns: 1fr 1fr; }
     }
+
+    /* ─── RESPONSIVE MOBILE (≤768px) ─── */
+    @media (max-width: 768px) {
+      .container { padding: 0 1.1rem; }
+
+      /* Nav */
+      .nav-links { display: none; }
+      .nav-right  { gap: 0.75rem; }
+
+      /* Hero */
+      .hero { padding: 5rem 0 3.5rem; }
+      .hero h1 { font-size: clamp(2rem, 9vw, 3rem); letter-spacing: -0.04em; }
+      .hero-sub { font-size: 0.88rem; max-width: 92vw; }
+      .hero-actions { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
+      .hero-badges { flex-wrap: wrap; gap: 0.4rem; font-size: 0.72rem; }
+
+      /* Sections */
+      .section-title { font-size: clamp(1.5rem, 6vw, 2rem); }
+
+      /* Grids → single column */
+      .what-grid      { grid-template-columns: 1fr; }
+      .flow           { grid-template-columns: 1fr 1fr; }
+      .contracts-grid { grid-template-columns: 1fr !important; }
+      .stats-grid     { grid-template-columns: 1fr 1fr; }
+      .usecases-grid  { grid-template-columns: 1fr; }
+      .partners-grid  { gap: 1.25rem; }
+
+      /* How-to steps */
+      .howto-step { grid-template-columns: 40px 1fr; gap: 0.75rem; }
+      .howto-num  { font-size: 1.1rem; }
+
+      /* Code blocks */
+      .code-tabs { font-size: 0.68rem; }
+      .code-body  { font-size: 0.7rem; padding: 1.2rem 1rem; overflow-x: auto; }
+      .tab-code-block { overflow: hidden; }
+
+      /* Comparison table */
+      .comp-table { font-size: 0.78rem; }
+      .comp-table th, .comp-table td { padding: 0.65rem 0.75rem; }
+
+      /* Token card */
+      .token-card { padding: 1.25rem; }
+      .token-actions { flex-direction: column; gap: 0.5rem; }
+      .token-actions .btn { width: 100%; text-align: center; }
+
+      /* Contract cards */
+      .contract-addr-row { flex-wrap: wrap; gap: 0.4rem; }
+
+      /* Footer */
+      .footer-inner { flex-direction: column; gap: 1rem; text-align: center; }
+      .footer-links { flex-wrap: wrap; justify-content: center; gap: 0.75rem; }
+    }
+
+    /* ─── RESPONSIVE SMALL (≤480px) ─── */
     @media (max-width: 480px) {
-      .flow { grid-template-columns: 1fr; }
-      .stats-grid { grid-template-columns: 1fr; }
+      .flow           { grid-template-columns: 1fr; }
+      .stats-grid     { grid-template-columns: 1fr; }
+      .hero-actions   { width: 100%; }
+      .hero-actions .btn { width: 100%; text-align: center; }
+      .code-body      { font-size: 0.65rem; line-height: 1.8; }
+      .howto-step     { grid-template-columns: 32px 1fr; }
+      .section-eyebrow { font-size: 0.65rem; }
+    }
+
+    /* ─── DESKTOP TWEAKS (≥1200px) ─── */
+    @media (min-width: 1200px) {
+      .container { max-width: 1200px; }
+      .hero h1 { font-size: 5rem; }
+      .contracts-grid { grid-template-columns: repeat(2, 1fr) !important; }
     }
   </style>
 </head>
