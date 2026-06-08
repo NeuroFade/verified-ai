@@ -469,6 +469,18 @@
       color: #98989d;
     }
     .code-body pre { display: inline; }
+    /* ─── TAB SWITCHER ─── */
+    .code-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); background: var(--surface); padding: 0 1rem; overflow-x: auto; }
+    .code-tab { padding: 0.55rem 1rem; font-size: 0.72rem; font-family: 'JetBrains Mono', monospace; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: color .2s, border-color .2s; user-select: none; }
+    .code-tab:hover { color: var(--text); }
+    .code-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .code-panel { display: none; }
+    .code-panel.active { display: block; }
+    /* ─── COPY BUTTON ─── */
+    .code-bar { position: relative; }
+    .copy-btn { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: 1px solid var(--border); color: var(--muted); font-size: 0.62rem; font-family: 'JetBrains Mono', monospace; border-radius: 6px; padding: 0.2rem 0.55rem; cursor: pointer; transition: color .2s, border-color .2s; letter-spacing: 0.04em; }
+    .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+    .copy-btn.copied { color: #30d158; border-color: #30d158; }
     .kw { color: #bf5af2; }
     .fn { color: #64d2ff; }
     .str { color: #30d158; }
@@ -731,7 +743,7 @@
       <a href="#contracts" class="btn btn-outline">View contracts</a>
     </div>
     <div class="hero-meta">
-      <span>Two contracts deployed</span>
+      <span>Four contracts deployed</span>
       <span>MIT licensed</span>
       <span>Built on Base</span>
       <span>Open source</span>
@@ -784,104 +796,312 @@
       <div class="howto-step">
         <div class="howto-num">01</div>
         <div class="howto-content">
-          <h4>Install the SDK</h4>
-          <p>Add <code>verified-ai-sdk</code> to your project via npm or yarn.</p>
-          <div class="code-block" style="margin-top:1rem">
+          <h4>Install the SDK or use direct ABI</h4>
+          <p>Add <code>verified-ai-sdk</code> to your project, or integrate directly via ethers.js / viem — no package needed.</p>
+          <div class="tab-code-block" style="margin-top:1rem;border:1px solid var(--border);border-radius:16px;overflow:hidden">
             <div class="code-bar">
-              <div class="code-bar-left"><div class="mac-dots"><span></span><span></span><span></span></div><span class="code-filename">terminal</span></div>
-              <span class="code-lang">Shell</span>
+              <div class="code-bar-left"><div class="mac-dots"><span></span><span></span><span></span></div><span class="code-filename">install</span></div>
             </div>
-            <div class="code-body"><pre>npm install verified-ai-sdk</pre></div>
+            <div class="code-tabs">
+              <span class="code-tab active" data-tab="sdk">SDK</span>
+              <span class="code-tab" data-tab="ethers">ethers.js v6</span>
+              <span class="code-tab" data-tab="viem">viem</span>
+            </div>
+            <div class="code-panel active" data-tab="sdk">
+              <div class="code-body"><pre>npm install verified-ai-sdk</pre></div>
+            </div>
+            <div class="code-panel" data-tab="ethers">
+              <div class="code-body"><pre>npm install ethers    <span class="cm"># v6</span></pre></div>
+            </div>
+            <div class="code-panel" data-tab="viem">
+              <div class="code-body"><pre>npm install viem</pre></div>
+            </div>
           </div>
         </div>
       </div>
       <div class="howto-step">
         <div class="howto-num">02</div>
         <div class="howto-content">
-          <h4>Connect your wallet</h4>
-          <p>You need a Base mainnet wallet with a small amount of ETH (gas is ~$0.002 per attestation).</p>
-          <div class="code-block" style="margin-top:1rem">
+          <h4>Connect to Base mainnet</h4>
+          <p>You need a Base mainnet wallet. Gas is ~$0.002 per attestation. Sponsored gas via Bankr is also supported.</p>
+          <div class="tab-code-block" style="margin-top:1rem;border:1px solid var(--border);border-radius:16px;overflow:hidden">
             <div class="code-bar">
-              <div class="code-bar-left"><div class="mac-dots"><span></span><span></span><span></span></div><span class="code-filename">client.ts</span></div>
-              <span class="code-lang">TypeScript</span>
+              <div class="code-bar-left"><div class="mac-dots"><span></span><span></span><span></span></div><span class="code-filename">client</span></div>
             </div>
-            <div class="code-body"><pre><span class="kw">import</span> { VerifiedAI } <span class="kw">from</span> <span class="str">'verified-ai-sdk'</span>
+            <div class="code-tabs">
+              <span class="code-tab active" data-tab="sdk">SDK</span>
+              <span class="code-tab" data-tab="ethers">ethers.js v6</span>
+              <span class="code-tab" data-tab="viem">viem</span>
+            </div>
+            <div class="code-panel active" data-tab="sdk">
+              <div class="code-body"><pre><span class="kw">import</span> { VerifiedAI } <span class="kw">from</span> <span class="str">'verified-ai-sdk'</span>
 
 <span class="kw">const</span> client = <span class="kw">new</span> <span class="fn">VerifiedAI</span>({
   network:    <span class="str">'base-mainnet'</span>,
-  privateKey: process.env.<span class="type">PRIVATE_KEY</span>, <span class="cm">// your Base wallet key</span>
+  privateKey: process.env.<span class="type">PRIVATE_KEY</span>,
 })</pre></div>
+            </div>
+            <div class="code-panel" data-tab="ethers">
+              <div class="code-body"><pre><span class="kw">import</span> { ethers } <span class="kw">from</span> <span class="str">'ethers'</span>
+
+<span class="kw">const</span> provider = <span class="kw">new</span> ethers.<span class="fn">JsonRpcProvider</span>(
+  <span class="str">'https://mainnet.base.org'</span>
+)
+<span class="kw">const</span> signer = <span class="kw">new</span> ethers.<span class="fn">Wallet</span>(
+  process.env.<span class="type">PRIVATE_KEY</span>, provider
+)
+
+<span class="cm">// AttestationRegistry ABI (minimal)</span>
+<span class="kw">const</span> REGISTRY = <span class="str">'0x3dBF622ABC705d2Ec0E07EB0fCbb1AbFDe0281eb'</span>
+<span class="kw">const</span> registry = <span class="kw">new</span> ethers.<span class="fn">Contract</span>(REGISTRY, [
+  <span class="str">'function registerProvider(string,string,bytes32) external'</span>,
+  <span class="str">'function submitAttestation(bytes32,bytes32,bytes32,bytes32) external returns (bytes32)'</span>,
+  <span class="str">'function verify(bytes32) external view returns (bool,tuple)'</span>,
+  <span class="str">'function isVerifiedProvider(address) external view returns (bool)'</span>,
+], signer)</pre></div>
+            </div>
+            <div class="code-panel" data-tab="viem">
+              <div class="code-body"><pre><span class="kw">import</span> { createWalletClient, createPublicClient, http } <span class="kw">from</span> <span class="str">'viem'</span>
+<span class="kw">import</span> { base } <span class="kw">from</span> <span class="str">'viem/chains'</span>
+<span class="kw">import</span> { privateKeyToAccount } <span class="kw">from</span> <span class="str">'viem/accounts'</span>
+
+<span class="kw">const</span> account = <span class="fn">privateKeyToAccount</span>(process.env.<span class="type">PRIVATE_KEY</span>)
+<span class="kw">const</span> publicClient  = <span class="fn">createPublicClient</span>({ chain: base, transport: <span class="fn">http</span>() })
+<span class="kw">const</span> walletClient  = <span class="fn">createWalletClient</span>({ account, chain: base, transport: <span class="fn">http</span>() })
+
+<span class="kw">const</span> REGISTRY = <span class="str">'0x3dBF622ABC705d2Ec0E07EB0fCbb1AbFDe0281eb'</span></pre></div>
+            </div>
           </div>
         </div>
       </div>
       <div class="howto-step">
         <div class="howto-num">03</div>
         <div class="howto-content">
-          <h4>Attest an inference</h4>
-          <p>After your AI model responds, submit the model ID, prompt, and response. The SDK hashes and signs everything, then writes to chain.</p>
-          <div class="code-block" style="margin-top:1rem">
+          <h4>Register as an inference provider</h4>
+          <p>One-time call. Declare your TEE type and signing key — required before submitting attestations.</p>
+          <div class="tab-code-block" style="margin-top:1rem;border:1px solid var(--border);border-radius:16px;overflow:hidden">
             <div class="code-bar">
-              <div class="code-bar-left"><div class="mac-dots"><span></span><span></span><span></span></div><span class="code-filename">attest.ts</span></div>
-              <span class="code-lang">TypeScript</span>
+              <div class="code-bar-left"><div class="mac-dots"><span></span><span></span><span></span></div><span class="code-filename">register.ts</span></div>
             </div>
-            <div class="code-body"><pre><span class="kw">const</span> result = <span class="kw">await</span> client.<span class="fn">attest</span>({
-  model:    <span class="str">'gpt-4o'</span>,          <span class="cm">// model identifier</span>
-  prompt:   userPrompt,         <span class="cm">// raw prompt string</span>
-  response: modelResponse,      <span class="cm">// raw response string</span>
-})
+            <div class="code-tabs">
+              <span class="code-tab active" data-tab="sdk">SDK</span>
+              <span class="code-tab" data-tab="ethers">ethers.js v6</span>
+              <span class="code-tab" data-tab="viem">viem</span>
+            </div>
+            <div class="code-panel active" data-tab="sdk">
+              <div class="code-body"><pre><span class="kw">await</span> client.<span class="fn">registerProvider</span>({
+  name:      <span class="str">'My Inference Node'</span>,
+  teeType:   <span class="str">'AWS_NITRO'</span>,  <span class="cm">// or INTEL_TDX | AMD_SEV_SNP</span>
+  publicKey: myTEESigningPublicKey,
+})</pre></div>
+            </div>
+            <div class="code-panel" data-tab="ethers">
+              <div class="code-body"><pre><span class="kw">import</span> { ethers } <span class="kw">from</span> <span class="str">'ethers'</span>
+<span class="kw">const</span> pubKeyHash = ethers.<span class="fn">keccak256</span>(myTEEPublicKeyBytes)
 
-console.<span class="fn">log</span>(result.id)      <span class="cm">// bytes32 — permanent on-chain ID</span>
-console.<span class="fn">log</span>(result.txHash)  <span class="cm">// basescan.org/tx/0x...</span></pre></div>
+<span class="kw">const</span> tx = <span class="kw">await</span> registry.<span class="fn">registerProvider</span>(
+  <span class="str">'My Inference Node'</span>,
+  <span class="str">'AWS_NITRO'</span>,
+  pubKeyHash
+)
+<span class="kw">await</span> tx.<span class="fn">wait</span>()
+console.<span class="fn">log</span>(<span class="str">'Provider registered:'</span>, tx.hash)</pre></div>
+            </div>
+            <div class="code-panel" data-tab="viem">
+              <div class="code-body"><pre><span class="kw">import</span> { keccak256 } <span class="kw">from</span> <span class="str">'viem'</span>
+<span class="kw">const</span> pubKeyHash = <span class="fn">keccak256</span>(myTEEPublicKeyBytes)
+
+<span class="kw">const</span> hash = <span class="kw">await</span> walletClient.<span class="fn">writeContract</span>({
+  address: REGISTRY,
+  abi: registryAbi,
+  functionName: <span class="str">'registerProvider'</span>,
+  args: [<span class="str">'My Inference Node'</span>, <span class="str">'AWS_NITRO'</span>, pubKeyHash],
+})
+<span class="kw">await</span> publicClient.<span class="fn">waitForTransactionReceipt</span>({ hash })</pre></div>
+            </div>
           </div>
         </div>
       </div>
       <div class="howto-step">
         <div class="howto-num">04</div>
         <div class="howto-content">
-          <h4>Verify any attestation</h4>
-          <p>Anyone — no private key needed — can verify an attestation ID trustlessly. Works from any environment, direct RPC, or on-chain from another contract.</p>
-          <div class="code-block" style="margin-top:1rem">
+          <h4>Attest an inference</h4>
+          <p>Hash your model fingerprint + prompt + response, then submit on-chain. Returns a permanent <code>bytes32</code> attestation ID.</p>
+          <div class="tab-code-block" style="margin-top:1rem;border:1px solid var(--border);border-radius:16px;overflow:hidden">
             <div class="code-bar">
-              <div class="code-bar-left"><div class="mac-dots"><span></span><span></span><span></span></div><span class="code-filename">verify.ts</span></div>
-              <span class="code-lang">TypeScript</span>
+              <div class="code-bar-left"><div class="mac-dots"><span></span><span></span><span></span></div><span class="code-filename">attest.ts</span></div>
             </div>
-            <div class="code-body"><pre><span class="cm">// Read-only — no wallet or key needed</span>
-<span class="kw">const</span> readClient = <span class="kw">new</span> <span class="fn">VerifiedAI</span>({ network: <span class="str">'base-mainnet'</span> })
+            <div class="code-tabs">
+              <span class="code-tab active" data-tab="sdk">SDK</span>
+              <span class="code-tab" data-tab="ethers">ethers.js v6</span>
+              <span class="code-tab" data-tab="viem">viem</span>
+            </div>
+            <div class="code-panel active" data-tab="sdk">
+              <div class="code-body"><pre><span class="kw">const</span> result = <span class="kw">await</span> client.<span class="fn">attest</span>({
+  model:    <span class="str">'gpt-4o'</span>,
+  prompt:   userPrompt,
+  response: modelResponse,
+})
 
-<span class="kw">const</span> isValid = <span class="kw">await</span> readClient.<span class="fn">verify</span>(attestationId)
-console.<span class="fn">log</span>(isValid) <span class="cm">// true</span>
+console.<span class="fn">log</span>(result.id)      <span class="cm">// bytes32 on-chain ID</span>
+console.<span class="fn">log</span>(result.txHash)  <span class="cm">// basescan.org/tx/0x...</span></pre></div>
+            </div>
+            <div class="code-panel" data-tab="ethers">
+              <div class="code-body"><pre><span class="kw">import</span> { ethers } <span class="kw">from</span> <span class="str">'ethers'</span>
 
-<span class="kw">const</span> record = <span class="kw">await</span> readClient.<span class="fn">getAttestation</span>(attestationId)
-console.<span class="fn">log</span>(record.modelId)   <span class="cm">// 'gpt-4o'</span>
-console.<span class="fn">log</span>(record.attester)  <span class="cm">// 0x... (submitter address)</span>
-console.<span class="fn">log</span>(record.timestamp) <span class="cm">// unix timestamp on Base</span></pre></div>
+<span class="kw">const</span> modelHash   = ethers.<span class="fn">keccak256</span>(ethers.<span class="fn">toUtf8Bytes</span>(<span class="str">'gpt-4o-weights-v1'</span>))
+<span class="kw">const</span> inputHash   = ethers.<span class="fn">keccak256</span>(ethers.<span class="fn">toUtf8Bytes</span>(userPrompt))
+<span class="kw">const</span> outputHash  = ethers.<span class="fn">keccak256</span>(ethers.<span class="fn">toUtf8Bytes</span>(modelResponse))
+<span class="kw">const</span> hardwareId  = ethers.<span class="fn">keccak256</span>(myTEEMeasurement)  <span class="cm">// PCR0 / MRTD</span>
+
+<span class="kw">const</span> tx = <span class="kw">await</span> registry.<span class="fn">submitAttestation</span>(
+  modelHash, inputHash, outputHash, hardwareId
+)
+<span class="kw">const</span> receipt = <span class="kw">await</span> tx.<span class="fn">wait</span>()
+
+<span class="cm">// Parse attestationId from emitted event</span>
+<span class="kw">const</span> log = receipt.logs[<span class="num">0</span>]
+<span class="kw">const</span> iface = registry.interface
+<span class="kw">const</span> parsed = iface.<span class="fn">parseLog</span>(log)
+<span class="kw">const</span> attestationId = parsed.args.attestationId
+console.<span class="fn">log</span>(<span class="str">'Attestation ID:'</span>, attestationId)</pre></div>
+            </div>
+            <div class="code-panel" data-tab="viem">
+              <div class="code-body"><pre><span class="kw">import</span> { keccak256, toBytes, decodeEventLog } <span class="kw">from</span> <span class="str">'viem'</span>
+
+<span class="kw">const</span> modelHash  = <span class="fn">keccak256</span>(<span class="fn">toBytes</span>(<span class="str">'gpt-4o-weights-v1'</span>))
+<span class="kw">const</span> inputHash  = <span class="fn">keccak256</span>(<span class="fn">toBytes</span>(userPrompt))
+<span class="kw">const</span> outputHash = <span class="fn">keccak256</span>(<span class="fn">toBytes</span>(modelResponse))
+<span class="kw">const</span> hardwareId = <span class="fn">keccak256</span>(myTEEMeasurement)
+
+<span class="kw">const</span> hash = <span class="kw">await</span> walletClient.<span class="fn">writeContract</span>({
+  address: REGISTRY,
+  abi: registryAbi,
+  functionName: <span class="str">'submitAttestation'</span>,
+  args: [modelHash, inputHash, outputHash, hardwareId],
+})
+<span class="kw">const</span> receipt = <span class="kw">await</span> publicClient.<span class="fn">waitForTransactionReceipt</span>({ hash })
+<span class="kw">const</span> event = <span class="fn">decodeEventLog</span>({ abi: registryAbi, data: receipt.logs[<span class="num">0</span>].data, topics: receipt.logs[<span class="num">0</span>].topics })
+console.<span class="fn">log</span>(<span class="str">'Attestation ID:'</span>, event.args.attestationId)</pre></div>
+            </div>
           </div>
         </div>
       </div>
       <div class="howto-step">
         <div class="howto-num">05</div>
         <div class="howto-content">
+          <h4>Verify any attestation</h4>
+          <p>Permissionless read — no private key needed. Works from any environment: Node.js, browser, or another contract.</p>
+          <div class="tab-code-block" style="margin-top:1rem;border:1px solid var(--border);border-radius:16px;overflow:hidden">
+            <div class="code-bar">
+              <div class="code-bar-left"><div class="mac-dots"><span></span><span></span><span></span></div><span class="code-filename">verify.ts</span></div>
+            </div>
+            <div class="code-tabs">
+              <span class="code-tab active" data-tab="sdk">SDK</span>
+              <span class="code-tab" data-tab="ethers">ethers.js v6</span>
+              <span class="code-tab" data-tab="viem">viem</span>
+            </div>
+            <div class="code-panel active" data-tab="sdk">
+              <div class="code-body"><pre><span class="kw">const</span> readClient = <span class="kw">new</span> <span class="fn">VerifiedAI</span>({ network: <span class="str">'base-mainnet'</span> })
+
+<span class="kw">const</span> isValid = <span class="kw">await</span> readClient.<span class="fn">verify</span>(attestationId)
+console.<span class="fn">log</span>(isValid)            <span class="cm">// true</span>
+
+<span class="kw">const</span> record = <span class="kw">await</span> readClient.<span class="fn">getAttestation</span>(attestationId)
+console.<span class="fn">log</span>(record.modelId)     <span class="cm">// 'gpt-4o'</span>
+console.<span class="fn">log</span>(record.attester)    <span class="cm">// 0x... (submitter)</span>
+console.<span class="fn">log</span>(record.timestamp)   <span class="cm">// unix timestamp on Base</span></pre></div>
+            </div>
+            <div class="code-panel" data-tab="ethers">
+              <div class="code-body"><pre><span class="cm">// Read-only provider — no wallet required</span>
+<span class="kw">const</span> provider = <span class="kw">new</span> ethers.<span class="fn">JsonRpcProvider</span>(<span class="str">'https://mainnet.base.org'</span>)
+<span class="kw">const</span> readRegistry = <span class="kw">new</span> ethers.<span class="fn">Contract</span>(REGISTRY, [
+  <span class="str">'function verify(bytes32) view returns (bool valid, tuple(bytes32,bytes32,bytes32,bytes32,address,uint256,bool) att)'</span>,
+  <span class="str">'function isVerifiedProvider(address) view returns (bool)'</span>,
+], provider)
+
+<span class="kw">const</span> [valid, att] = <span class="kw">await</span> readRegistry.<span class="fn">verify</span>(attestationId)
+console.<span class="fn">log</span>(<span class="str">'Valid:'</span>, valid)
+console.<span class="fn">log</span>(<span class="str">'Provider:'</span>, att.provider)
+console.<span class="fn">log</span>(<span class="str">'Timestamp:'</span>, <span class="kw">new</span> <span class="fn">Date</span>(Number(att.timestamp) * <span class="num">1000</span>).<span class="fn">toISOString</span>())</pre></div>
+            </div>
+            <div class="code-panel" data-tab="viem">
+              <div class="code-body"><pre><span class="kw">const</span> [valid, att] = <span class="kw">await</span> publicClient.<span class="fn">readContract</span>({
+  address: REGISTRY,
+  abi: registryAbi,
+  functionName: <span class="str">'verify'</span>,
+  args: [attestationId],
+})
+console.<span class="fn">log</span>(<span class="str">'Valid:'</span>, valid)
+console.<span class="fn">log</span>(<span class="str">'Provider:'</span>, att.provider)
+console.<span class="fn">log</span>(<span class="str">'Timestamp:'</span>, <span class="kw">new</span> <span class="fn">Date</span>(Number(att.timestamp) * <span class="num">1000</span>).<span class="fn">toISOString</span>())</pre></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="howto-step">
+        <div class="howto-num">06</div>
+        <div class="howto-content">
           <h4>Submit a ZK proof (optional)</h4>
-          <p>For maximum verifiability, link a Groth16 zkML proof to the attestation. Proof commitment stored on ZKVerifier contract.</p>
-          <div class="code-block" style="margin-top:1rem">
+          <p>For maximum verifiability, link a Groth16 zkML proof to the attestation. Proof commitment stored on ZKVerifier contract at <code>0xc303124d…c85d3</code>.</p>
+          <div class="tab-code-block" style="margin-top:1rem;border:1px solid var(--border);border-radius:16px;overflow:hidden">
             <div class="code-bar">
               <div class="code-bar-left"><div class="mac-dots"><span></span><span></span><span></span></div><span class="code-filename">proof.ts</span></div>
-              <span class="code-lang">TypeScript</span>
             </div>
-            <div class="code-body"><pre><span class="kw">await</span> client.<span class="fn">submitProof</span>({
+            <div class="code-tabs">
+              <span class="code-tab active" data-tab="sdk">SDK</span>
+              <span class="code-tab" data-tab="ethers">ethers.js v6</span>
+              <span class="code-tab" data-tab="viem">viem</span>
+            </div>
+            <div class="code-panel active" data-tab="sdk">
+              <div class="code-body"><pre><span class="kw">await</span> client.<span class="fn">submitProof</span>({
   attestationId: result.id,
-  proof:         groth16ProofBytes, <span class="cm">// from Lagrange DeepProve</span>
+  proof:         groth16ProofBytes,  <span class="cm">// from Lagrange DeepProve</span>
   publicInputs:  publicInputsHash,
 })
 
-<span class="cm">// Verify the proof exists on-chain</span>
 <span class="kw">const</span> hasProof = <span class="kw">await</span> readClient.<span class="fn">verifyProof</span>(result.id)
-console.<span class="fn">log</span>(hasProof) <span class="cm">// true</span></pre></div>
+console.<span class="fn">log</span>(hasProof)  <span class="cm">// true</span></pre></div>
+            </div>
+            <div class="code-panel" data-tab="ethers">
+              <div class="code-body"><pre><span class="kw">const</span> ZKVERIFIER = <span class="str">'0xc303124d9276Ea7D3d75E94cE7fE5bd3DBec85d3'</span>
+<span class="kw">const</span> zkv = <span class="kw">new</span> ethers.<span class="fn">Contract</span>(ZKVERIFIER, [
+  <span class="str">'function submitProof(bytes32,bytes32,bytes32) external returns (bytes32)'</span>,
+  <span class="str">'function hasValidProof(bytes32) view returns (bool)'</span>,
+], signer)
+
+<span class="kw">const</span> proofHash        = ethers.<span class="fn">keccak256</span>(groth16ProofBytes)
+<span class="kw">const</span> publicInputsHash = ethers.<span class="fn">keccak256</span>(ethers.<span class="fn">concat</span>([modelHash, outputHash]))
+
+<span class="kw">const</span> tx = <span class="kw">await</span> zkv.<span class="fn">submitProof</span>(attestationId, proofHash, publicInputsHash)
+<span class="kw">await</span> tx.<span class="fn">wait</span>()
+
+<span class="kw">const</span> ok = <span class="kw">await</span> zkv.<span class="fn">hasValidProof</span>(attestationId)
+console.<span class="fn">log</span>(<span class="str">'Proof on-chain:'</span>, ok)  <span class="cm">// true</span></pre></div>
+            </div>
+            <div class="code-panel" data-tab="viem">
+              <div class="code-body"><pre><span class="kw">const</span> ZKVERIFIER = <span class="str">'0xc303124d9276Ea7D3d75E94cE7fE5bd3DBec85d3'</span>
+<span class="kw">const</span> proofHash        = <span class="fn">keccak256</span>(groth16ProofBytes)
+<span class="kw">const</span> publicInputsHash = <span class="fn">keccak256</span>(<span class="fn">concat</span>([modelHash, outputHash]))
+
+<span class="kw">const</span> hash = <span class="kw">await</span> walletClient.<span class="fn">writeContract</span>({
+  address: ZKVERIFIER, abi: zkVerifierAbi,
+  functionName: <span class="str">'submitProof'</span>,
+  args: [attestationId, proofHash, publicInputsHash],
+})
+<span class="kw">await</span> publicClient.<span class="fn">waitForTransactionReceipt</span>({ hash })
+
+<span class="kw">const</span> ok = <span class="kw">await</span> publicClient.<span class="fn">readContract</span>({
+  address: ZKVERIFIER, abi: zkVerifierAbi,
+  functionName: <span class="str">'hasValidProof'</span>, args: [attestationId],
+})
+console.<span class="fn">log</span>(<span class="str">'Proof on-chain:'</span>, ok)</pre></div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="howto-cta fade-in">
+        <div class="howto-cta fade-in">
       <a href="https://neuro-8.gitbook.io/verified-ai/getting-started/getting-started" class="btn btn-primary" target="_blank">Full getting started guide →</a>
       <a href="https://neuro-8.gitbook.io/verified-ai/reference/sdk-reference" class="btn btn-outline" target="_blank">SDK reference</a>
     </div>
@@ -1013,9 +1233,9 @@ console.<span class="fn">log</span>(hasProof) <span class="cm">// true</span></p
 <section id="contracts">
   <div class="container">
     <p class="section-eyebrow">Smart Contracts</p>
-    <h2 class="section-title fade-in">Three contracts, one system</h2>
-    <p class="section-desc fade-in">Token + identity layer + proof layer. Composable by design, deployed on Base mainnet.</p>
-    <div class="contracts-grid fade-in" style="grid-template-columns: repeat(3, 1fr)">
+    <h2 class="section-title fade-in">Four contracts, one system</h2>
+    <p class="section-desc fade-in">Token + identity layer + proof layer + agent registry. Composable by design, deployed on Base mainnet.</p>
+    <div class="contracts-grid fade-in" style="grid-template-columns: repeat(2, 1fr)">
       <div class="contract-card">
         <div class="contract-tag">Token</div>
         <h3>VERIFIEDAI Token</h3>
@@ -1041,6 +1261,15 @@ console.<span class="fn">log</span>(hasProof) <span class="cm">// true</span></p
         <div class="contract-addr-row">
           <a href="https://basescan.org/address/0xc303124d9276Ea7D3d75E94cE7fE5bd3DBec85d3" target="_blank" class="contract-addr">0xc303124d…c85d3 ↗</a>
           <span class="mainnet-badge">Mainnet</span>
+        </div>
+      </div>
+      <div class="contract-card">
+        <div class="contract-tag">Agent Registry</div>
+        <h3>AgentCapabilityRegistry</h3>
+        <p>ERC-8004 compatible agent identity layer. Register AI agents with capability declarations, x402 pricing, trust scores, and endorsement chains. Query which agents require attestation.</p>
+        <div class="contract-addr-row">
+          <span class="contract-addr" style="cursor:default;color:var(--muted)">Source on GitHub ↗</span>
+          <span class="mainnet-badge" style="background:rgba(255,159,10,.15);color:#ff9f0a;border-color:rgba(255,159,10,.3)">Deploying</span>
         </div>
       </div>
     </div>
@@ -1161,5 +1390,37 @@ console.<span class="fn">log</span>(valid) <span class="cm">// true</span></pre>
   document.querySelectorAll('.fade-in').forEach(el => io.observe(el));
 </script>
 
+<script>
+// ── Copy buttons ──
+document.querySelectorAll('.code-bar').forEach(bar => {
+  const btn = document.createElement('button');
+  btn.className = 'copy-btn';
+  btn.textContent = 'copy';
+  btn.addEventListener('click', () => {
+    const panel = bar.closest('.code-block, .tab-code-block');
+    const pre = panel ? panel.querySelector('.code-panel.active pre, .code-body pre') : null;
+    if (!pre) return;
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = 'copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 1800);
+    });
+  });
+  bar.appendChild(btn);
+});
+// ── Tab switchers ──
+document.querySelectorAll('.code-tabs').forEach(tabs => {
+  tabs.querySelectorAll('.code-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const block = tab.closest('.tab-code-block');
+      block.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+      block.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      const target = block.querySelector('.code-panel[data-tab="' + tab.dataset.tab + '"]');
+      if (target) target.classList.add('active');
+    });
+  });
+});
+</script>
 </body>
 </html>
