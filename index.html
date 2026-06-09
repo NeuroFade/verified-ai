@@ -16,41 +16,37 @@
   <link rel="icon" href="./logo.jpg" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      --bg: #f5f5f0;
-      --bg2: #efefea;
-      --surface: rgba(0,0,0,0.03);
-      --surface2: rgba(0,0,0,0.055);
-      --border: rgba(0,0,0,0.08);
-      --border-mid: rgba(0,0,0,0.12);
-      --border-dark: rgba(0,0,0,0.18);
-      --text: #0d0d0d;
-      --text2: #444444;
-      --text3: #888888;
+      --bg: #080808;
+      --bg2: #0e0e0e;
+      --surface: rgba(255,255,255,0.03);
+      --surface2: rgba(255,255,255,0.055);
+      --border: rgba(255,255,255,0.07);
+      --border-mid: rgba(255,255,255,0.10);
+      --border-dark: rgba(255,255,255,0.16);
+      --text: #f0f0f0;
+      --text2: #888888;
+      --text3: #555555;
       --accent: #7B4FFF;
-      --accent-dark: #5e35e0;
-      --accent-dim: rgba(123,79,255,0.09);
-      --accent-subtle: rgba(123,79,255,0.15);
+      --accent-dark: #9b6fff;
+      --accent-dim: rgba(123,79,255,0.10);
+      --accent-subtle: rgba(123,79,255,0.18);
       --green: #22c55e;
       --mono: 'JetBrains Mono', monospace;
-      --sans: 'Space Grotesk', sans-serif;
+      --sans: 'Inter', sans-serif;
     }
 
     html {
       background-color: var(--bg);
-      background-image:
-        linear-gradient(rgba(0,0,0,0.028) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,0,0,0.028) 1px, transparent 1px);
-      background-size: 40px 40px;
       scroll-behavior: smooth;
     }
 
     body {
-      background: transparent;
+      background: var(--bg);
       color: var(--text);
       font-family: var(--sans);
       line-height: 1.6;
@@ -72,7 +68,7 @@
       top: 0;
       z-index: 1000;
       padding: 0.9rem 0;
-      background: rgba(245,245,240,0.88);
+      background: rgba(8,8,8,0.88);
       backdrop-filter: saturate(180%) blur(24px);
       -webkit-backdrop-filter: saturate(180%) blur(24px);
       border-bottom: 1px solid var(--border);
@@ -194,10 +190,9 @@
     .hero h1 {
       font-size: clamp(2.6rem, 5.5vw, 4.2rem);
       font-weight: 700;
-      letter-spacing: -0.045em;
-      line-height: 1.04;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
       margin-bottom: 1.5rem;
-      text-transform: uppercase;
     }
     .hero h1 .muted { color: var(--text3); }
 
@@ -237,8 +232,8 @@
     }
     .btn-primary:hover { background: var(--accent-dark); transform: translateY(-1px); }
     .btn-ghost {
-      background: transparent;
-      border: 1px solid var(--border-dark);
+      background: var(--surface);
+      border: 1px solid var(--border-mid);
       color: var(--text);
     }
     .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
@@ -247,7 +242,7 @@
       display: inline-flex;
       align-items: center;
       gap: 0.75rem;
-      background: var(--surface2);
+      background: var(--surface);
       border: 1px solid var(--border-mid);
       border-radius: 6px;
       padding: 0.6rem 1rem;
@@ -334,9 +329,8 @@
     }
     .section h2 {
       font-size: clamp(1.6rem, 3.5vw, 2.2rem);
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: -0.025em;
       margin-bottom: 1rem;
     }
     .section > .lead {
@@ -360,10 +354,12 @@
     }
     .card {
       padding: 1.4rem;
-      background: rgba(255,255,255,0.55);
-      border: 1px solid var(--border-mid);
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 8px;
+      transition: border-color 0.2s;
     }
+    .card:hover { border-color: var(--border-mid); }
     .card-tag {
       font-family: var(--mono);
       font-size: 0.6rem;
@@ -375,8 +371,7 @@
     }
     .card h3 {
       font-size: 0.9rem;
-      font-weight: 700;
-      text-transform: uppercase;
+      font-weight: 600;
       margin-bottom: 0.45rem;
     }
     .card p { font-size: 0.83rem; color: var(--text2); line-height: 1.6; }
@@ -385,8 +380,8 @@
     .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.25rem; }
     .step {
       padding: 1.4rem;
-      background: rgba(255,255,255,0.55);
-      border: 1px solid var(--border-mid);
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 8px;
       position: relative;
     }
@@ -397,7 +392,7 @@
       color: var(--accent);
       margin-bottom: 0.5rem;
     }
-    .step h3 { font-size: 0.88rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.4rem; }
+    .step h3 { font-size: 0.88rem; font-weight: 600; margin-bottom: 0.4rem; }
     .step p { font-size: 0.82rem; color: var(--text2); }
 
     /* ────────────────── CODE ────────────────── */
@@ -431,8 +426,8 @@
     .contracts { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
     .contract {
       padding: 1rem 1.2rem;
-      background: rgba(255,255,255,0.55);
-      border: 1px solid var(--border-mid);
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 7px;
       font-family: var(--mono);
     }
@@ -525,7 +520,7 @@
         <h1>
           SSL certificates<br>
           for the age<br>
-          of <span class="muted">agents.</span>
+          of <span class="muted">agents</span>.
         </h1>
 
         <p class="hero-sub">
