@@ -237,7 +237,7 @@
       clip-path: polygon(0 30%, 100% 30%, 100% 50%, 0 50%);
     }
     .glitch::after {
-      color: #00f3ff;
+      color: #2563eb;
       animation: glitch-after 6s infinite;
       clip-path: polygon(0 60%, 100% 60%, 100% 75%, 0 75%);
     }
@@ -333,7 +333,7 @@
     .sidebar { position: sticky; top: 100px; align-self: start; }
 
     .terminal {
-      background: #040410;
+      background: #f0f5ff;
       border-radius: 4px;
       overflow: hidden;
       font-family: var(--mono);
@@ -346,8 +346,8 @@
       align-items: center;
       gap: 0.4rem;
       padding: 0.65rem 0.9rem;
-      background: #050a05;
-      border-bottom: 1px solid rgba(59,130,246,0.1);
+      background: #e8f0fe;
+      border-bottom: 1px solid rgba(59,130,246,0.15);
     }
     .tdot { width: 10px; height: 10px; border-radius: 50%; }
     .tdot-r { background: #ff5f56; box-shadow: 0 0 4px #ff5f56; }
@@ -360,21 +360,21 @@
       text-transform: uppercase;
       letter-spacing: 0.08em;
     }
-    .terminal-body { padding: 1rem; line-height: 1.85; color: #60a5fa; background: #040410; }
+    .terminal-body { padding: 1rem; line-height: 1.85; color: #1e40af; background: #f0f5ff; }
     .tl { display: block; margin-bottom: 0.1rem; }
     .tl .tk { color: #1e40af; }
-    .tl .tv { color: #93c5fd; }
-    .tl .ta { color: #60a5fa; text-shadow: 0 0 8px rgba(96,165,250,0.7); }
-    .tl .ts { color: #818cf8; text-shadow: 0 0 8px rgba(129,140,248,0.7); }
-    .tl .td { color: #1e3a5f; }
+    .tl .tv { color: #2563eb; }
+    .tl .ta { color: #1d4ed8; text-shadow: none; }
+    .tl .ts { color: #4f46e5; text-shadow: none; }
+    .tl .td { color: #475569; }
     .tl .tp { color: #ffb800; }
     .tgap { display: block; margin: 0.4rem 0; }
     /* cursor blink */
     .tcursor::after {
       content: '█';
       animation: cursor-blink 1s step-end infinite;
-      color: var(--green);
-      text-shadow: 0 0 12px #3b82f6, 0 0 24px rgba(129,140,248,0.5);
+      color: #2563eb;
+      text-shadow: none;
     }
     @keyframes cursor-blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
@@ -482,7 +482,7 @@
       font-size: 0.76rem;
       line-height: 1.7;
       margin: 1.25rem 0;
-      border: 1px solid #2a2a2a;
+      border: 1px solid rgba(37,99,235,0.15);
     }
     code {
       font-family: var(--mono);
@@ -610,7 +610,7 @@
     /* ── BOOT SCREEN ── */
     #boot-screen {
       position: fixed; inset: 0;
-      background: #000;
+      background: #f0f5ff;
       z-index: 99999;
       display: flex;
       flex-direction: column;
@@ -619,17 +619,17 @@
       padding: 3rem;
       font-family: var(--mono);
       font-size: 0.78rem;
-      color: #3b82f6;
+      color: #1d4ed8;
       transition: opacity 0.5s;
     }
     #boot-screen.fade-out { opacity: 0; pointer-events: none; }
     #boot-log { line-height: 2; }
     #boot-log .bl { display: block; opacity: 0; animation: fade-in-line 0.01s forwards; }
-    #boot-log .ok { color: #3b82f6; }
-    #boot-log .dim { color: #1e40af; }
-    #boot-log .warn { color: #ffb800; }
+    #boot-log .ok { color: #1d4ed8; }
+    #boot-log .dim { color: #64748b; }
+    #boot-log .warn { color: #d97706; }
     #boot-bar { margin-top: 1rem; color: #1e40af; }
-    #boot-bar span { color: #3b82f6; text-shadow: 0 0 8px rgba(96,165,250,0.6); }
+    #boot-bar span { color: #1d4ed8; text-shadow: none; }
     @keyframes fade-in-line { to { opacity: 1; } }
 
     /* ── STATS BAR ── */
@@ -962,7 +962,7 @@ console.<span class="code-accent">log</span>(result.txHash)  <span class="code-c
   </div>
 
   <!-- ─── ASCII DIVIDER ─── -->
-  <div style="font-family:var(--mono);font-size:0.6rem;color:#1a3a1a;text-align:center;padding:1rem 0;letter-spacing:0.05em;">
+  <div style="font-family:var(--mono);font-size:0.6rem;color:#2563eb;text-align:center;padding:1rem 0;letter-spacing:0.05em;">
     /* ════════════════════════════════════════════ $VERIFIEDAI ════════════════════════════════════════════ */
   </div>
 
@@ -1004,7 +1004,7 @@ console.<span class="code-accent">log</span>(result.txHash)  <span class="code-c
   </div>
 
   <!-- ─── ASCII DIVIDER ─── -->
-  <div style="font-family:var(--mono);font-size:0.6rem;color:#1a3a1a;text-align:center;padding:1rem 0;letter-spacing:0.05em;">
+  <div style="font-family:var(--mono);font-size:0.6rem;color:#2563eb;text-align:center;padding:1rem 0;letter-spacing:0.05em;">
     /* ════════════════════════════════════════════ ROADMAP ════════════════════════════════════════════ */
   </div>
 
