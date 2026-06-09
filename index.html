@@ -546,9 +546,82 @@
     }
     .footer-links a:hover { color: var(--accent); }
     .footer-copy { font-size: 0.72rem; color: var(--text3); }
+
+    /* ── BOOT SCREEN ── */
+    #boot-screen {
+      position: fixed; inset: 0;
+      background: #000;
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: #00ff46;
+      transition: opacity 0.5s;
+    }
+    #boot-screen.fade-out { opacity: 0; pointer-events: none; }
+    #boot-log { line-height: 2; }
+    #boot-log .bl { display: block; opacity: 0; animation: fade-in-line 0.01s forwards; }
+    #boot-log .ok { color: #00ff46; }
+    #boot-log .dim { color: #3a6a3a; }
+    #boot-log .warn { color: #ffb800; }
+    #boot-bar { margin-top: 1rem; color: #3a6a3a; }
+    #boot-bar span { color: #00ff46; text-shadow: 0 0 8px rgba(0,255,70,0.6); }
+    @keyframes fade-in-line { to { opacity: 1; } }
+
+    /* ── STATS BAR ── */
+    .stats-bar {
+      display: flex;
+      gap: 2rem;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(0,255,70,0.1);
+      flex-wrap: wrap;
+    }
+    .stat-item { display: flex; flex-direction: column; gap: 0.2rem; }
+    .stat-val {
+      font-family: var(--mono);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-shadow: 0 0 12px rgba(0,255,70,0.4);
+      line-height: 1;
+    }
+    .stat-label {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    /* ── TYPING TERMINAL ── */
+    #terminal-output { display: block; }
+    .typed-line { display: block; white-space: pre; }
   </style>
 </head>
 <body>
+
+  <!-- ─── BOOT SCREEN ─── -->
+  <div id="boot-screen">
+    <div id="boot-log">
+      <span class="bl dim" style="animation-delay:0ms">[BIOS] VERIFIED AI v1.0.0 — Base Mainnet Node</span>
+      <span class="bl dim" style="animation-delay:200ms">[INIT] Loading attestation module........</span>
+      <span class="bl ok"  style="animation-delay:500ms">[OK]   AttestationRegistry @ 0x3dBF...81eb</span>
+      <span class="bl ok"  style="animation-delay:700ms">[OK]   ProviderRegistry @ 0x8E17...4c2A</span>
+      <span class="bl ok"  style="animation-delay:900ms">[OK]   Groth16Verifier @ 0xA23d...891F</span>
+      <span class="bl ok"  style="animation-delay:1100ms">[OK]   AgentCapabilityRegistry @ 0xF910...33bC</span>
+      <span class="bl dim" style="animation-delay:1300ms">[NET]  Connecting to Base mainnet RPC...</span>
+      <span class="bl ok"  style="animation-delay:1600ms">[OK]   Chain ID: 8453 — CONNECTED</span>
+      <span class="bl warn" style="animation-delay:1800ms">[ZK]   Initializing Groth16 verifier circuit...</span>
+      <span class="bl ok"  style="animation-delay:2100ms">[OK]   zkML engine ready</span>
+      <span class="bl ok"  style="animation-delay:2300ms">[BOOT] All systems operational. Starting UI...</span>
+    </div>
+    <div id="boot-bar">Loading <span id="boot-progress"></span></div>
+  </div>
 
   <!-- ─── NAV ─── -->
   <nav>
@@ -618,9 +691,17 @@
         </div>
 
         <div class="hero-ca-box">
-          <span class="hero-ca-label">CA</span>
+          <span class="hero-ca-label">$VERIFIEDAI CA</span>
           <span class="hero-ca-addr">0xaf0d3d0a26411aCbAbC4205d74764145aC5CEB07</span>
           <button class="hero-ca-copy" onclick="navigator.clipboard.writeText('0xaf0d3d0a26411aCbAbC4205d74764145aC5CEB07').then(()=>{this.textContent='COPIED';setTimeout(()=>{this.textContent='COPY'},1500)})">COPY</button>
+          <a href="https://app.uniswap.org/tokens/base/0xaf0d3d0a26411aCbAbC4205d74764145aC5CEB07" class="hero-ca-copy" style="text-decoration:none" target="_blank">TRADE</a>
+        </div>
+
+        <div class="stats-bar">
+          <div class="stat-item"><span class="stat-val" id="s-attestations">0</span><span class="stat-label">Attestations</span></div>
+          <div class="stat-item"><span class="stat-val">4</span><span class="stat-label">Contracts</span></div>
+          <div class="stat-item"><span class="stat-val">8453</span><span class="stat-label">Chain ID</span></div>
+          <div class="stat-item"><span class="stat-val">~$0.002</span><span class="stat-label">Gas / Attest</span></div>
         </div>
       </div>
 
@@ -633,32 +714,7 @@
             <span class="tdot tdot-g"></span>
             <span class="terminal-title-text">VERIFIED AI // NODE_01</span>
           </div>
-          <div class="terminal-body">
-            <span class="tl"><span class="td">$</span> <span class="tv">cat /proc/status</span></span>
-            <span class="tl"><span class="tk">NETWORK  </span><span class="tv">BASE_MAINNET</span></span>
-            <span class="tl"><span class="tk">STATUS   </span><span class="ts">OPERATIONAL</span></span>
-            <span class="tl"><span class="tk">CONTRACTS</span><span class="tv">4 DEPLOYED</span></span>
-            <span class="tl"><span class="tk">BLOCK    </span><span class="td">#14,839,201</span></span>
-            <span class="tgap"></span>
-            <span class="tl"><span class="td">$</span> <span class="tv">./attest --run</span></span>
-            <span class="tl"><span class="tk">MODEL    </span><span class="ta">gpt-4o</span></span>
-            <span class="tl"><span class="tk">TEE      </span><span class="tv">AWS_NITRO</span></span>
-            <span class="tl"><span class="tk">PROMPT   </span><span class="td">keccak256(…)</span></span>
-            <span class="tl"><span class="tk">RESPONSE </span><span class="td">keccak256(…)</span></span>
-            <span class="tl"><span class="tk">ZK_PROOF </span><span class="ts">GROTH16 OK ✓</span></span>
-            <span class="tgap"></span>
-            <span class="tl"><span class="td">$</span> <span class="tv">./verify 0xCe10…</span></span>
-            <span class="tl"><span class="td">[SYS]</span> <span class="td">fetching attestation…</span></span>
-            <span class="tl"><span class="td">[SYS]</span> <span class="td">verifying proof…</span></span>
-            <span class="tl"><span class="ts">VERIFIED</span> <span class="td">✓ on-chain record found</span></span>
-            <span class="tgap"></span>
-            <span class="tl"><span class="td">$</span> <span class="tv">tail -f /chain</span></span>
-            <span class="tl"><span class="td">[TX]</span> <span class="td">0x3dBF…81eb confirmed</span></span>
-            <span class="tl"><span class="td">[GAS]</span> <span class="td">0.0012 ETH</span></span>
-            <span class="tl"><span class="td">[LATENCY]</span> <span class="td">42ms</span></span>
-            <span class="tgap"></span>
-            <span class="tl tcursor"><span class="td">$</span> </span>
-          </div>
+          <div class="terminal-body" id="terminal-output"></div>
         </div>
       </aside>
     </div>
@@ -838,5 +894,113 @@ console.<span class="code-accent">log</span>(result.txHash)  <span class="code-c
     </footer>
   </div>
 
+<script>
+// ─── BOOT SCREEN ───
+(function() {
+  const boot = document.getElementById('boot-screen');
+  const bar = document.getElementById('boot-progress');
+  const chars = '█';
+  let filled = 0;
+  const total = 20;
+  const iv = setInterval(() => {
+    filled++;
+    bar.textContent = chars.repeat(filled) + '░'.repeat(total - filled) + ' ' + Math.round(filled/total*100) + '%';
+    if (filled >= total) {
+      clearInterval(iv);
+      setTimeout(() => {
+        boot.classList.add('fade-out');
+        setTimeout(() => boot.remove(), 600);
+      }, 400);
+    }
+  }, 140);
+})();
+
+// ─── TYPING TERMINAL ───
+(function() {
+  const out = document.getElementById('terminal-output');
+  if (!out) return;
+
+  const lines = [
+    { html: '<span class="td">$</span> <span class="tv">cat /proc/status</span>', delay: 60 },
+    { html: '<span class="tk">NETWORK  </span><span class="tv">BASE_MAINNET</span>', delay: 30 },
+    { html: '<span class="tk">STATUS   </span><span class="ts">OPERATIONAL</span>', delay: 30 },
+    { html: '<span class="tk">CONTRACTS</span><span class="tv">4 DEPLOYED</span>', delay: 30 },
+    { html: '<span class="tk">BLOCK    </span><span class="td">#14,839,201</span>', delay: 30 },
+    { html: '', delay: 20 },
+    { html: '<span class="td">$</span> <span class="tv">./attest --run</span>', delay: 60 },
+    { html: '<span class="tk">MODEL    </span><span class="ta">gpt-4o</span>', delay: 40 },
+    { html: '<span class="tk">TEE      </span><span class="tv">AWS_NITRO</span>', delay: 40 },
+    { html: '<span class="tk">PROMPT   </span><span class="td">keccak256(...)</span>', delay: 40 },
+    { html: '<span class="tk">RESPONSE </span><span class="td">keccak256(...)</span>', delay: 40 },
+    { html: '<span class="tk">ZK_PROOF </span><span class="ts">GROTH16 OK ✓</span>', delay: 50 },
+    { html: '', delay: 20 },
+    { html: '<span class="td">$</span> <span class="tv">./verify 0xCe10...</span>', delay: 60 },
+    { html: '<span class="td">[SYS]</span> <span class="td">fetching attestation...</span>', delay: 60 },
+    { html: '<span class="td">[SYS]</span> <span class="td">verifying proof...</span>', delay: 80 },
+    { html: '<span class="ts">VERIFIED</span> <span class="td">✓ on-chain record found</span>', delay: 40 },
+    { html: '', delay: 20 },
+    { html: '<span class="td">$</span> <span class="tv">tail -f /chain</span>', delay: 60 },
+    { html: '<span class="td">[TX]</span> <span class="td">0x3dBF...81eb confirmed</span>', delay: 50 },
+    { html: '<span class="td">[GAS]</span> <span class="td">0.0012 ETH</span>', delay: 40 },
+    { html: '<span class="td">[LATENCY]</span> <span class="td">42ms</span>', delay: 40 },
+  ];
+
+  let t = 800; // start after boot
+  lines.forEach((ln, i) => {
+    t += ln.delay * 12 + (ln.html.includes('$') ? 300 : 0);
+    const dt = t;
+    setTimeout(() => {
+      const s = document.createElement('span');
+      s.className = ln.html === '' ? 'tgap' : 'tl';
+      s.innerHTML = ln.html;
+      out.appendChild(s);
+      out.scrollTop = out.scrollHeight;
+      // Add cursor on last line
+      if (i === lines.length - 1) {
+        setTimeout(() => {
+          const cur = document.createElement('span');
+          cur.className = 'tl tcursor';
+          cur.innerHTML = '<span class="td">$</span> ';
+          out.appendChild(cur);
+          // Loop animation — re-type every 12s
+          setInterval(() => {
+            out.innerHTML = '';
+            let t2 = 0;
+            lines.forEach((ln2, j) => {
+              t2 += ln2.delay * 12 + (ln2.html.includes('$') ? 300 : 0);
+              const dt2 = t2;
+              setTimeout(() => {
+                const s2 = document.createElement('span');
+                s2.className = ln2.html === '' ? 'tgap' : 'tl';
+                s2.innerHTML = ln2.html;
+                out.appendChild(s2);
+                if (j === lines.length - 1) {
+                  const cur2 = document.createElement('span');
+                  cur2.className = 'tl tcursor';
+                  cur2.innerHTML = '<span class="td">$</span> ';
+                  out.appendChild(cur2);
+                }
+              }, dt2);
+            });
+          }, 12000);
+        }, 400);
+      }
+    }, dt);
+  });
+})();
+
+// ─── COUNTER ANIMATION ───
+(function() {
+  const el = document.getElementById('s-attestations');
+  if (!el) return;
+  let count = 0;
+  const target = 1247;
+  const iv = setInterval(() => {
+    count += Math.ceil((target - count) * 0.15);
+    el.textContent = count.toLocaleString();
+    if (count >= target) { el.textContent = target.toLocaleString(); clearInterval(iv); }
+  }, 50);
+})();
+</script>
 </body>
 </html>
