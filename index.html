@@ -547,6 +547,72 @@
     .footer-links a:hover { color: var(--accent); }
     .footer-copy { font-size: 0.72rem; color: var(--text3); }
 
+    /* ── TOKENOMICS ── */
+    .token-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .token-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.2rem;
+      text-align: center;
+    }
+    .token-card-val {
+      font-family: var(--mono);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-shadow: 0 0 10px rgba(0,255,70,0.3);
+      display: block;
+    }
+    .token-card-label {
+      font-size: 0.62rem;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-top: 0.3rem;
+      display: block;
+    }
+
+    /* ── ROADMAP ── */
+    .roadmap { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+    .rm-phase {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.2rem;
+      position: relative;
+    }
+    .rm-phase.active { border-color: var(--accent); box-shadow: 0 0 16px rgba(0,255,70,0.1); }
+    .rm-badge {
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0.15rem 0.5rem;
+      border-radius: 3px;
+      margin-bottom: 0.7rem;
+      display: inline-block;
+    }
+    .rm-badge.done { background: rgba(0,255,70,0.1); color: var(--accent); border: 1px solid rgba(0,255,70,0.2); }
+    .rm-badge.now { background: rgba(255,184,0,0.1); color: var(--amber); border: 1px solid rgba(255,184,0,0.3); }
+    .rm-badge.next { background: rgba(255,255,255,0.04); color: var(--text3); border: 1px solid var(--border); }
+    .rm-phase h3 { font-size: 0.82rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .rm-phase ul { list-style: none; padding: 0; font-size: 0.75rem; color: var(--text2); line-height: 1.8; }
+    .rm-phase ul li::before { content: '> '; color: var(--text3); }
+    .rm-phase.active ul li::before { content: '> '; color: var(--accent); }
+
+    /* ── SDK INSTALL ── */
+    .sdk-install {
+      background: #030803;
+      border: 1px solid rgba(0,255,70,0.15);
+      border-radius: 6px;
+      padding: 1rem 1.2rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: #8fd48f;
+      margin-top: 1.5rem;
+    }
+    .sdk-install .cmd { color: var(--accent); }
+
     /* ── BOOT SCREEN ── */
     #boot-screen {
       position: fixed; inset: 0;
@@ -875,6 +941,111 @@ console.<span class="code-accent">log</span>(result.txHash)  <span class="code-c
             </a>
           </div>
         </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ─── ASCII DIVIDER ─── -->
+  <div style="font-family:var(--mono);font-size:0.6rem;color:#1a3a1a;text-align:center;padding:1rem 0;letter-spacing:0.05em;">
+    /* ════════════════════════════════════════════ $VERIFIEDAI ════════════════════════════════════════════ */
+  </div>
+
+  <!-- ─── TOKENOMICS ─── -->
+  <div class="container">
+    <section class="section" id="tokenomics">
+      <div class="section-tag">/05 Token</div>
+      <h2>$VERIFIEDAI — governance + access</h2>
+      <p class="lead">Token is the key to the network. Stake to become a verified provider, vote on whitelist decisions, earn from attestation fees.</p>
+
+      <div class="token-grid">
+        <div class="token-card">
+          <span class="token-card-val">1B</span>
+          <span class="token-card-label">Total Supply</span>
+        </div>
+        <div class="token-card">
+          <span class="token-card-val">Base</span>
+          <span class="token-card-label">Chain</span>
+        </div>
+        <div class="token-card">
+          <span class="token-card-val">0%</span>
+          <span class="token-card-label">Team Allocation</span>
+        </div>
+        <div class="token-card">
+          <span class="token-card-val">100%</span>
+          <span class="token-card-label">Community</span>
+        </div>
+      </div>
+
+      <div style="margin-top:1.2rem;">
+        <div class="hero-ca-box" style="max-width:520px;">
+          <span class="hero-ca-label">$VERIFIEDAI CA</span>
+          <span class="hero-ca-addr">0xaf0d3d0a26411aCbAbC4205d74764145aC5CEB07</span>
+          <button class="hero-ca-copy" onclick="navigator.clipboard.writeText('0xaf0d3d0a26411aCbAbC4205d74764145aC5CEB07').then(()=>{this.textContent='COPIED';setTimeout(()=>{this.textContent='COPY'},1500)})">COPY</button>
+          <a href="https://app.uniswap.org/tokens/base/0xaf0d3d0a26411aCbAbC4205d74764145aC5CEB07" class="hero-ca-copy" style="text-decoration:none" target="_blank">TRADE</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ─── ASCII DIVIDER ─── -->
+  <div style="font-family:var(--mono);font-size:0.6rem;color:#1a3a1a;text-align:center;padding:1rem 0;letter-spacing:0.05em;">
+    /* ════════════════════════════════════════════ ROADMAP ════════════════════════════════════════════ */
+  </div>
+
+  <!-- ─── ROADMAP ─── -->
+  <div class="container">
+    <section class="section" id="roadmap">
+      <div class="section-tag">/06 Roadmap</div>
+      <h2>From token to infrastructure</h2>
+      <p class="lead">Community-first. Infrastructure follows.</p>
+
+      <div class="roadmap">
+        <div class="rm-phase">
+          <span class="rm-badge done">✓ Done</span>
+          <h3>Phase 1 — Foundation</h3>
+          <ul>
+            <li>Token deployed on Base</li>
+            <li>4 contracts live</li>
+            <li>SDK published (npm)</li>
+            <li>Landing page live</li>
+          </ul>
+        </div>
+        <div class="rm-phase active">
+          <span class="rm-badge now">▶ Now</span>
+          <h3>Phase 2 — Community</h3>
+          <ul>
+            <li>Token/community growth</li>
+            <li>Twitter presence</li>
+            <li>Provider outreach</li>
+            <li>Base ecosystem grant</li>
+          </ul>
+        </div>
+        <div class="rm-phase">
+          <span class="rm-badge next">Next</span>
+          <h3>Phase 3 — Providers</h3>
+          <ul>
+            <li>Onboard first provider</li>
+            <li>Gaia / Akash integration</li>
+            <li>Attestation volume live</li>
+            <li>SDK v1.0 stable</li>
+          </ul>
+        </div>
+        <div class="rm-phase">
+          <span class="rm-badge next">Future</span>
+          <h3>Phase 4 — Scale</h3>
+          <ul>
+            <li>Multi-chain expansion</li>
+            <li>Enterprise tier</li>
+            <li>zkML mainnet proofs</li>
+            <li>DAO governance</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="sdk-install">
+        <div style="color:var(--text3);margin-bottom:0.5rem"># Install SDK</div>
+        <div><span class="cmd">npm install</span> verified-ai-sdk</div>
+        <div style="margin-top:0.5rem;color:var(--text3)"># v0.2.0 · MIT · 0 dependencies · Base mainnet</div>
       </div>
     </section>
   </div>
