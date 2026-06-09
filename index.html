@@ -206,14 +206,15 @@
 
     .hero h1 {
       font-size: clamp(2.6rem, 5.5vw, 4.2rem);
-      font-weight: 700;
-      letter-spacing: 0.01em;
-      line-height: 1.1;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.05;
       margin-bottom: 1.5rem;
+      color: #0f172a;
       text-shadow: none;
-      animation: flicker 8s ease-in-out infinite;
+
     }
-    .hero h1 .muted { color: var(--text3); }
+    .hero h1 .muted { color: #2563eb; font-style: italic; }
     @keyframes flicker {
       0%,90%,92%,94%,100% { opacity: 1; }
       91%,93% { opacity: 0.82; }
@@ -383,20 +384,26 @@
       border-top: 1px solid rgba(37,99,235,0.08);
     }
     .section-tag {
+      display: inline-flex;
+      align-items: center;
       font-family: var(--mono);
       font-size: 0.65rem;
       font-weight: 700;
       color: var(--accent);
+      background: rgba(37,99,235,0.07);
+      border: 1px solid rgba(37,99,235,0.15);
+      border-radius: 99px;
+      padding: 0.2rem 0.75rem;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
-      margin-bottom: 0.75rem;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
     }
     .section h2 {
       font-size: clamp(1.6rem, 3.5vw, 2.2rem);
-      font-weight: 600;
-      letter-spacing: 0em;
+      font-weight: 700;
+      letter-spacing: -0.01em;
       margin-bottom: 1rem;
-      text-shadow: none;
+      color: #0f172a;
     }
     .section > .lead {
       font-size: 1rem;
@@ -640,7 +647,7 @@
       font-size: 1.4rem;
       font-weight: 700;
       color: var(--accent);
-      text-shadow: 0 0 12px rgba(59,130,246,0.4);
+      text-shadow: none;
       line-height: 1;
     }
     .stat-label {
@@ -655,74 +662,6 @@
     #terminal-output { display: block; }
     .typed-line { display: block; white-space: pre; }
   
-    /* Blue gradient glass theme */
-    .btn-primary {
-      background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 50%, #818cf8 100%) !important;
-      box-shadow: 0 0 20px rgba(59,130,246,0.4), 0 0 40px rgba(129,140,248,0.2) !important;
-      border: none !important;
-      color: #fff !important;
-    }
-    .btn-primary:hover {
-      background: linear-gradient(135deg, #2563eb 0%, #60a5fa 50%, #a5b4fc 100%) !important;
-      box-shadow: 0 0 30px rgba(59,130,246,0.6), 0 0 60px rgba(129,140,248,0.3) !important;
-      transform: translateY(-1px);
-    }
-    .hero-ca-box {
-      background: linear-gradient(135deg, rgba(29,78,216,0.12) 0%, rgba(129,140,248,0.08) 100%) !important;
-      border: 1px solid rgba(99,102,241,0.3) !important;
-      backdrop-filter: blur(8px);
-    }
-    .card {
-      background: linear-gradient(135deg, rgba(10,10,30,0.9) 0%, rgba(15,15,40,0.95) 100%) !important;
-      border: 1px solid rgba(59,130,246,0.15) !important;
-    }
-    .card:hover {
-      border-color: rgba(99,102,241,0.4) !important;
-      box-shadow: 0 0 20px rgba(59,130,246,0.1) !important;
-    }
-    .section-label {
-      background: linear-gradient(90deg, #3b82f6, #818cf8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    /* Phosphor scanlines in blue */
-    body::before {
-      background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(59,130,246,0.015) 2px,
-        rgba(59,130,246,0.015) 4px
-      ) !important;
-    }
-    /* CRT vignette blue tint */
-    body::after {
-      background: radial-gradient(ellipse at center, transparent 60%, rgba(0,5,20,0.85) 100%) !important;
-    }
-    /* Nav border */
-    .nav {
-      border-bottom: 1px solid rgba(59,130,246,0.15) !important;
-      background: rgba(5,5,20,0.95) !important;
-      backdrop-filter: blur(10px);
-    }
-    /* Section heading gradient */
-    h2 { 
-      background: linear-gradient(90deg, #3b82f6, #818cf8, #c7d2fe);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    /* Terminal window glass */
-    .terminal-window {
-      border: 1px solid rgba(59,130,246,0.25) !important;
-      box-shadow: 0 0 30px rgba(59,130,246,0.1), inset 0 0 60px rgba(0,5,30,0.5) !important;
-    }
-    .terminal-header {
-      background: linear-gradient(90deg, rgba(10,10,30,0.95), rgba(20,20,50,0.95)) !important;
-      border-bottom: 1px solid rgba(59,130,246,0.2) !important;
-    }
-
     </style>
 </head>
 <body>
@@ -759,7 +698,7 @@
         <a href="#intelligence">/INTELLIGENCE</a>
         <a href="#contracts">/CONTRACTS</a>
       </div>
-      <a href="https://github.com/neurofade/verified-ai" class="nav-cta" style="background:transparent;color:var(--accent);border:1px solid rgba(59,130,246,0.4);box-shadow:0 0 10px rgba(59,130,246,0.15);">View Source</a>
+      <a href="https://github.com/neurofade/verified-ai" class="nav-cta" style="background:rgba(37,99,235,0.08);color:var(--accent);border:1px solid rgba(37,99,235,0.25);">View Source</a>
     </div>
   </nav>
 
