@@ -8,6 +8,11 @@ pragma solidity ^0.8.24;
  *
  * Every x402 inference call can optionally anchor an attestation here.
  * Anyone can verify: did model X really produce output Y from input Z?
+ *
+ * Security fixes (v1.1):
+ *   - Added 2-step ownership transfer (transferOwnership / acceptOwnership)
+ *   - Emit nonce in AttestationSubmitted event so verifyByComponents() is usable off-chain
+ *   - Added string length validation on provider name/teeType
  */
 contract AttestationRegistry {
 
@@ -22,6 +27,7 @@ contract AttestationRegistry {
         bytes32 hardwareId;      // TEE measurement (PCR0 for Nitro, MRTD for TDX)
         address provider;        // address of the inference provider
         uint256 timestamp;       // block.timestamp at submission
+        uint256 nonce;           // totalAttestations value at submission (for off-chain replay)
         bool revoked;            // provider can revoke if submission error
     }
 
@@ -45,8 +51,11 @@ contract AttestationRegistry {
     mapping(bytes32 => bool) public attestationExists;
 
     address public owner;
+    address public pendingOwner;   // 2-step ownership transfer
     uint256 public totalAttestations;
-    uint256 public constant VERSION = 1;
+    uint256 public constant VERSION = 2;
+
+    uint256 private constant MAX_STRING_LEN = 256;
 
     // ─────────────────────────────────────────────
     // EVENTS
@@ -57,7 +66,8 @@ contract AttestationRegistry {
         address indexed provider,
         bytes32 modelHash,
         bytes32 outputHash,
-        uint256 timestamp
+        uint256 timestamp,
+        uint256 nonce           // emitted so verifyByComponents() works off-chain
     );
 
     event AttestationRevoked(
@@ -73,17 +83,24 @@ contract AttestationRegistry {
 
     event ProviderDeactivated(address indexed provider);
 
+    // 2-step ownership
+    event OwnershipTransferStarted(address indexed previousOwner, address indexed newOwner);
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
     // ─────────────────────────────────────────────
     // ERRORS
     // ─────────────────────────────────────────────
 
     error NotOwner();
+    error NotPendingOwner();
     error ProviderNotRegistered();
     error ProviderAlreadyRegistered();
     error AttestationNotFound();
     error AttestationAlreadyRevoked();
     error NotAttestationProvider();
     error ProviderInactive();
+    error StringTooLong();
+    error ZeroAddress();
 
     // ─────────────────────────────────────────────
     // CONSTRUCTOR
@@ -91,6 +108,31 @@ contract AttestationRegistry {
 
     constructor() {
         owner = msg.sender;
+    }
+
+    // ─────────────────────────────────────────────
+    // OWNERSHIP (2-step)
+    // ─────────────────────────────────────────────
+
+    /**
+     * @notice Initiate ownership transfer — new owner must call acceptOwnership()
+     * @dev Prevents accidental transfer to wrong address
+     */
+    function transferOwnership(address newOwner) external {
+        if (msg.sender != owner) revert NotOwner();
+        if (newOwner == address(0)) revert ZeroAddress();
+        pendingOwner = newOwner;
+        emit OwnershipTransferStarted(owner, newOwner);
+    }
+
+    /**
+     * @notice Accept pending ownership transfer
+     */
+    function acceptOwnership() external {
+        if (msg.sender != pendingOwner) revert NotPendingOwner();
+        emit OwnershipTransferred(owner, pendingOwner);
+        owner = pendingOwner;
+        pendingOwner = address(0);
     }
 
     // ─────────────────────────────────────────────
@@ -108,6 +150,8 @@ contract AttestationRegistry {
         string calldata teeType,
         bytes32 publicKeyHash
     ) external {
+        if (bytes(name).length > MAX_STRING_LEN) revert StringTooLong();
+        if (bytes(teeType).length > MAX_STRING_LEN) revert StringTooLong();
         if (providers[msg.sender].registeredAt != 0) revert ProviderAlreadyRegistered();
 
         providers[msg.sender] = ProviderProfile({
@@ -145,6 +189,8 @@ contract AttestationRegistry {
         if (profile.registeredAt == 0) revert ProviderNotRegistered();
         if (!profile.active) revert ProviderInactive();
 
+        uint256 nonce = totalAttestations;
+
         attestationId = keccak256(abi.encodePacked(
             msg.sender,
             modelHash,
@@ -152,7 +198,7 @@ contract AttestationRegistry {
             outputHash,
             hardwareId,
             block.timestamp,
-            totalAttestations
+            nonce
         ));
 
         attestations[attestationId] = Attestation({
@@ -162,6 +208,7 @@ contract AttestationRegistry {
             hardwareId: hardwareId,
             provider: msg.sender,
             timestamp: block.timestamp,
+            nonce: nonce,
             revoked: false
         });
 
@@ -170,12 +217,14 @@ contract AttestationRegistry {
         profile.attestationCount++;
         totalAttestations++;
 
+        // Emit nonce so off-chain callers can use verifyByComponents()
         emit AttestationSubmitted(
             attestationId,
             msg.sender,
             modelHash,
             outputHash,
-            block.timestamp
+            block.timestamp,
+            nonce
         );
 
         return attestationId;
@@ -202,8 +251,7 @@ contract AttestationRegistry {
 
     /**
      * @notice Verify by recomputing the attestation ID from components
-     * @dev Useful when you have the raw inference data and want to check
-     *      if a valid attestation exists for it
+     * @dev Use nonce from the AttestationSubmitted event (field: nonce)
      */
     function verifyByComponents(
         address provider,

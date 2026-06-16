@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="virtual-protocol-site-verification" content="6053bc87c2d4ae95e57d8257f94a30b9" />
   <title>Verified AI — On-chain attestation for AI inference</title>
   <meta name="description" content="Cryptographic proof that your AI model ran. On-chain attestation layer for AI inference on Base." />
   <meta property="og:title" content="Verified AI" />
@@ -32,6 +33,9 @@
 
     body {
       background: var(--bg);
+      background-image: 
+        radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 32px 32px;
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
       line-height: 1.6;
@@ -85,6 +89,20 @@
       animation: blink 2.5s ease-in-out infinite;
     }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: none; }
+    }
+    .hero > * {
+      animation: fadeUp 0.7s ease backwards;
+    }
+    .hero-glow { animation-delay: 0s; }
+    .badge { animation-delay: 0.1s; }
+    .hero h1 { animation-delay: 0.15s; }
+    .hero-sub { animation-delay: 0.25s; }
+    .hero-actions { animation-delay: 0.35s; }
+    .hero-meta { animation-delay: 0.45s; }
     .nav-right {
       display: flex;
       align-items: center;
@@ -307,6 +325,9 @@
     .contract-card {
       padding: 2.5rem 2.25rem;
       background: var(--bg);
+      background-image: 
+        radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 32px 32px;
       transition: background 0.25s;
     }
     .contract-card:hover { background: var(--surface); }
@@ -384,6 +405,9 @@
     .stat {
       padding: 2.25rem 2rem;
       background: var(--bg);
+      background-image: 
+        radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 32px 32px;
       transition: background 0.25s;
     }
     .stat:hover { background: var(--surface); }
@@ -409,6 +433,9 @@
     .usecase-card {
       padding: 2rem 1.75rem;
       background: var(--bg);
+      background-image: 
+        radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 32px 32px;
       transition: background 0.25s;
     }
     .usecase-card:hover { background: var(--surface); }

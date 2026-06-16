@@ -16,6 +16,11 @@ pragma solidity ^0.8.24;
  *   2. Provider declares risk category (minimal/limited/high/unacceptable)
  *   3. Anyone can verify model compliance status before paying for inference
  *   4. Regulators/auditors can audit on-chain without accessing raw data
+ *
+ * Security fixes (v1.1):
+ *   - EU_ACT_DEADLINE corrected to 2026-08-02 00:00:00 UTC (was wrong by 1 year)
+ *   - Added 2-step ownership transfer
+ *   - Added string length validation on model fields
  */
 contract AIActCompliance {
 
@@ -84,10 +89,19 @@ contract AIActCompliance {
     mapping(address => bool) public approvedAuditors;       // authorized compliance auditors
 
     address public owner;
+    address public pendingOwner;   // 2-step ownership transfer
+
     uint256 public constant COMPLIANCE_VALIDITY = 365 days;
-    uint256 public constant EU_ACT_DEADLINE = 1754006400;   // 2025-08-01 00:00:00 UTC
+
+    // FIXED: was 1754006400 (2025-08-01) — off by exactly 1 year
+    // Correct value: 2026-08-02 00:00:00 UTC = 1785542400
+    uint256 public constant EU_ACT_DEADLINE = 1785542400;   // 2026-08-02 00:00:00 UTC
+
     uint256 public totalModels;
-    uint256 public constant VERSION = 1;
+    uint256 public constant VERSION = 2;
+
+    uint256 private constant MAX_STRING_LEN = 1024;
+    uint256 private constant MAX_SHORT_STRING_LEN = 256;
 
     // ─────────────────────────────────────────────
     // EVENTS
@@ -110,18 +124,23 @@ contract AIActCompliance {
     event TrainingDataUpdated(bytes32 indexed modelHash, bytes32 newTrainingDataHash);
     event AuditorApproved(address indexed auditor);
     event AuditorRevoked(address indexed auditor);
+    event OwnershipTransferStarted(address indexed previousOwner, address indexed newOwner);
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     // ─────────────────────────────────────────────
     // ERRORS
     // ─────────────────────────────────────────────
 
     error NotOwner();
+    error NotPendingOwner();
     error NotApprovedAuditor();
     error ModelAlreadyRegistered();
     error ModelNotFound();
     error UnacceptableRiskCategoryForbidden();
     error MissingTrainingDataForHighRisk();
     error NotModelProvider();
+    error StringTooLong();
+    error ZeroAddress();
 
     // ─────────────────────────────────────────────
     // CONSTRUCTOR
@@ -133,20 +152,30 @@ contract AIActCompliance {
     }
 
     // ─────────────────────────────────────────────
+    // OWNERSHIP (2-step)
+    // ─────────────────────────────────────────────
+
+    function transferOwnership(address newOwner) external {
+        if (msg.sender != owner) revert NotOwner();
+        if (newOwner == address(0)) revert ZeroAddress();
+        pendingOwner = newOwner;
+        emit OwnershipTransferStarted(owner, newOwner);
+    }
+
+    function acceptOwnership() external {
+        if (msg.sender != pendingOwner) revert NotPendingOwner();
+        emit OwnershipTransferred(owner, pendingOwner);
+        owner = pendingOwner;
+        pendingOwner = address(0);
+    }
+
+    // ─────────────────────────────────────────────
     // MODEL REGISTRATION (Provider)
     // ─────────────────────────────────────────────
 
     /**
      * @notice Register a model with EU AI Act compliance data
      * @dev High-risk models (RiskCategory.High) MUST provide trainingDataHash
-     * @param modelHash keccak256 of model weights fingerprint
-     * @param modelName Human-readable model name
-     * @param version Semantic version string
-     * @param riskCategory EU AI Act risk classification
-     * @param trainingDataHash keccak256 commitment to training data manifest
-     * @param trainingDataURI Public URI of dataset card (IPFS preferred)
-     * @param intendedPurpose What the model is designed to do
-     * @param evaluationHash keccak256 of evaluation report
      */
     function registerModel(
         bytes32 modelHash,
@@ -162,6 +191,9 @@ contract AIActCompliance {
         string calldata humanOversightMeasures,
         bytes32 evaluationHash
     ) external {
+        if (bytes(modelName).length > MAX_SHORT_STRING_LEN) revert StringTooLong();
+        if (bytes(version).length > MAX_SHORT_STRING_LEN) revert StringTooLong();
+        if (bytes(intendedPurpose).length > MAX_STRING_LEN) revert StringTooLong();
         if (models[modelHash].registeredAt != 0) revert ModelAlreadyRegistered();
         if (riskCategory == RiskCategory.Unacceptable) revert UnacceptableRiskCategoryForbidden();
         if (riskCategory == RiskCategory.High && trainingDataHash == bytes32(0)) {
@@ -220,15 +252,13 @@ contract AIActCompliance {
 
     /**
      * @notice Submit audit result for a model
-     * @param modelHash Model to audit
-     * @param passed Whether the model passes EU AI Act compliance
-     * @param findingsURI IPFS/HTTPS URI of detailed audit findings
      */
     function auditModel(
         bytes32 modelHash,
         bool passed,
         string calldata findingsURI
     ) external {
+        if (bytes(findingsURI).length > MAX_STRING_LEN) revert StringTooLong();
         if (!approvedAuditors[msg.sender]) revert NotApprovedAuditor();
         ModelRecord storage record = models[modelHash];
         if (record.registeredAt == 0) revert ModelNotFound();
@@ -254,8 +284,6 @@ contract AIActCompliance {
 
     /**
      * @notice Check if a model is currently EU AI Act compliant
-     * @return compliant True if model has valid, non-expired compliance certificate
-     * @return record Full compliance record
      */
     function checkCompliance(bytes32 modelHash)
         external
@@ -288,7 +316,7 @@ contract AIActCompliance {
         status = record.status;
         riskCategory = record.riskCategory;
         expiresAt = record.expiresAt;
-        // Was the model registered before the EU AI Act deadline?
+        // Was the model registered before the EU AI Act deadline (2026-08-02)?
         deadlineCompliant = record.registeredAt > 0 && record.registeredAt <= EU_ACT_DEADLINE;
     }
 

@@ -11,13 +11,11 @@ pragma solidity ^0.8.24;
  *      - Reputation scores (based on attestation volume + quality)
  *      - Agent-to-agent trust delegation
  *
- * An "agent" here is any autonomous software entity that:
- *   - Has an Ethereum address
- *   - Declares capabilities (skills, models, APIs)
- *   - Optionally links to Verified AI attestations for its inference calls
- *
- * Compatible with ERC-8004 agent identity standard.
- * See: https://eips.ethereum.org/EIPS/eip-8004 (pending)
+ * Security fixes (v1.1):
+ *   - grantTrust() now checks for duplicate trust links to prevent array bloat DoS
+ *   - Removed placeholder ERC8004_INTERFACE_ID (was invalid bytes4 literal)
+ *   - Added 2-step ownership transfer
+ *   - Added string length validation
  */
 contract AgentCapabilityRegistry {
 
@@ -78,19 +76,27 @@ contract AgentCapabilityRegistry {
     mapping(address => mapping(string => Capability)) public capabilities; // agent → capId → cap
     mapping(address => string[]) public agentCapabilityIds;               // agent → list of capIds
     mapping(address => mapping(address => TrustLink)) public trustLinks;  // from → to → link
-    mapping(address => address[]) public trustedBy;                        // who trusts this agent
-    mapping(address => address[]) public trusts;                           // who this agent trusts
+
+    // Track whether a trust link already exists to prevent duplicate array entries
+    mapping(address => mapping(address => bool)) private _trustLinkExists;
+
+    mapping(address => address[]) public trustedBy;  // who trusts this agent
+    mapping(address => address[]) public trusts;     // who this agent trusts
 
     // Attestation registry link (optional — for reputation tracking)
     address public attestationRegistry;
     address public owner;
+    address public pendingOwner;  // 2-step ownership transfer
 
     uint256 public totalAgents;
-    uint256 public constant VERSION = 1;
+    uint256 public constant VERSION = 2;
 
-    // ERC-8004 compatibility fields
+    // ERC-8004 compatibility
     string public constant ERC8004_VERSION = "0.1.0";
-    bytes4 public constant ERC8004_INTERFACE_ID = 0x8004_0000; // placeholder
+    // NOTE: ERC8004_INTERFACE_ID intentionally omitted until standard is finalized
+
+    uint256 private constant MAX_STRING_LEN = 512;
+    uint256 private constant MAX_SHORT_STRING_LEN = 256;
 
     // ─────────────────────────────────────────────
     // EVENTS
@@ -118,12 +124,15 @@ contract AgentCapabilityRegistry {
 
     event ReputationUpdated(address indexed agentAddress, uint256 newScore);
     event AgentDeactivated(address indexed agentAddress);
+    event OwnershipTransferStarted(address indexed previousOwner, address indexed newOwner);
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     // ─────────────────────────────────────────────
     // ERRORS
     // ─────────────────────────────────────────────
 
     error NotOwner();
+    error NotPendingOwner();
     error NotAgentOwner();
     error AgentAlreadyRegistered();
     error AgentNotFound();
@@ -131,6 +140,7 @@ contract AgentCapabilityRegistry {
     error CapabilityNotFound();
     error InvalidTrustLevel();
     error ZeroAddress();
+    error StringTooLong();
 
     // ─────────────────────────────────────────────
     // CONSTRUCTOR
@@ -143,15 +153,29 @@ contract AgentCapabilityRegistry {
     }
 
     // ─────────────────────────────────────────────
+    // OWNERSHIP (2-step)
+    // ─────────────────────────────────────────────
+
+    function transferOwnership(address newOwner) external {
+        if (msg.sender != owner) revert NotOwner();
+        if (newOwner == address(0)) revert ZeroAddress();
+        pendingOwner = newOwner;
+        emit OwnershipTransferStarted(owner, newOwner);
+    }
+
+    function acceptOwnership() external {
+        if (msg.sender != pendingOwner) revert NotPendingOwner();
+        emit OwnershipTransferred(owner, pendingOwner);
+        owner = pendingOwner;
+        pendingOwner = address(0);
+    }
+
+    // ─────────────────────────────────────────────
     // AGENT REGISTRATION
     // ─────────────────────────────────────────────
 
     /**
      * @notice Register an AI agent with its identity and metadata
-     * @param agentAddress The agent's Ethereum address (can be a smart wallet)
-     * @param name Human-readable agent name
-     * @param description What this agent does
-     * @param metadataURI IPFS URI of full agent specification (ERC-8004 format)
      */
     function registerAgent(
         address agentAddress,
@@ -159,6 +183,8 @@ contract AgentCapabilityRegistry {
         string calldata description,
         string calldata metadataURI
     ) external {
+        if (bytes(name).length > MAX_SHORT_STRING_LEN) revert StringTooLong();
+        if (bytes(description).length > MAX_STRING_LEN) revert StringTooLong();
         if (agents[agentAddress].registeredAt != 0) revert AgentAlreadyRegistered();
 
         agents[agentAddress] = AgentProfile({
@@ -185,16 +211,6 @@ contract AgentCapabilityRegistry {
 
     /**
      * @notice Add a capability to an agent's profile
-     * @param agentAddress The agent to add capability to
-     * @param capabilityId Unique slug (e.g., "inference:llama3-70b")
-     * @param name Human-readable capability name
-     * @param description What this capability does
-     * @param capType Capability category
-     * @param modelIds Model identifiers used (can be empty)
-     * @param endpointURI API endpoint URI (can be empty for privacy)
-     * @param x402Enabled Whether this capability accepts x402 payments
-     * @param pricePerCallWei Price in wei (0 = free)
-     * @param attestationRequired Whether calls must be attested on Verified AI
      */
     function addCapability(
         address agentAddress,
@@ -208,6 +224,9 @@ contract AgentCapabilityRegistry {
         uint256 pricePerCallWei,
         bool attestationRequired
     ) external {
+        if (bytes(name).length > MAX_SHORT_STRING_LEN) revert StringTooLong();
+        if (bytes(description).length > MAX_STRING_LEN) revert StringTooLong();
+
         AgentProfile storage agent = agents[agentAddress];
         if (agent.registeredAt == 0) revert AgentNotFound();
         if (agent.owner != msg.sender) revert NotAgentOwner();
@@ -250,15 +269,14 @@ contract AgentCapabilityRegistry {
 
     /**
      * @notice Grant trust to another agent
-     * @param toAgent Agent to trust
-     * @param trustLevel 1–100 (100 = full trust)
-     * @param reason Human-readable reason for trust
+     * @dev Prevents duplicate array entries — re-calling updates the existing link
      */
     function grantTrust(
         address toAgent,
         uint256 trustLevel,
         string calldata reason
     ) external {
+        if (bytes(reason).length > MAX_STRING_LEN) revert StringTooLong();
         if (trustLevel == 0 || trustLevel > 100) revert InvalidTrustLevel();
         if (agents[toAgent].registeredAt == 0) revert AgentNotFound();
 
@@ -271,8 +289,12 @@ contract AgentCapabilityRegistry {
             active: true
         });
 
-        trustedBy[toAgent].push(msg.sender);
-        trusts[msg.sender].push(toAgent);
+        // Only push to arrays if this is a NEW trust link (prevents DoS via array bloat)
+        if (!_trustLinkExists[msg.sender][toAgent]) {
+            _trustLinkExists[msg.sender][toAgent] = true;
+            trustedBy[toAgent].push(msg.sender);
+            trusts[msg.sender].push(toAgent);
+        }
 
         emit TrustGranted(msg.sender, toAgent, trustLevel);
     }
@@ -293,9 +315,6 @@ contract AgentCapabilityRegistry {
 
     /**
      * @notice Update agent reputation (called by registry owner or attestation contract)
-     * @param agentAddress Agent to update
-     * @param delta Signed delta in basis points (positive = reputation up)
-     * @param attestationsAdded Number of new verified attestations
      */
     function updateReputation(
         address agentAddress,
@@ -327,9 +346,6 @@ contract AgentCapabilityRegistry {
     // READ
     // ─────────────────────────────────────────────
 
-    /**
-     * @notice Get all capability IDs for an agent
-     */
     function getAgentCapabilities(address agentAddress)
         external
         view
@@ -338,9 +354,6 @@ contract AgentCapabilityRegistry {
         return agentCapabilityIds[agentAddress];
     }
 
-    /**
-     * @notice Get a specific capability for an agent
-     */
     function getCapability(address agentAddress, string calldata capabilityId)
         external
         view
@@ -349,16 +362,10 @@ contract AgentCapabilityRegistry {
         return capabilities[agentAddress][capabilityId];
     }
 
-    /**
-     * @notice Get agents that trust this agent
-     */
     function getEndorsers(address agentAddress) external view returns (address[] memory) {
         return trustedBy[agentAddress];
     }
 
-    /**
-     * @notice Check if agent A trusts agent B (and at what level)
-     */
     function getTrustLevel(address from, address to)
         external
         view
