@@ -1,21 +1,3 @@
-# ── Secrets (NEVER commit) ─────────────────────
-DEPLOYER_WALLET.txt
-.env
-.env.*
-*.key
-*.pem
-private_key*
-
-# ── Foundry build artifacts ────────────────────
-/cache
-/out
-
-# ── Node ───────────────────────────────────────
 node_modules/
-.next/
-dist/
-
-# ── OS / editor ────────────────────────────────
+*.log
 .DS_Store
-.idea/
-.vscode/
